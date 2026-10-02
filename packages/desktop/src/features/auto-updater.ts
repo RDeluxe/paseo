@@ -224,7 +224,8 @@ class ElectronAppUpdateRuntime implements AppUpdateRuntime {
 
 const appUpdateService = createAppUpdateService({
   runtime: new ElectronAppUpdateRuntime(),
-  isPackaged: () => app.isPackaged,
+  // Off in the RDeluxe/paseo fork: the official feed would replace the fork's build.
+  isPackaged: () => false,
   now: () => Date.now(),
   bucket: async () => bucketFromStagingUserId(await getStagingUserId()),
   reportCheckError: (error) => {
