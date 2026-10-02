@@ -52,6 +52,28 @@ describe("tool-call presentation", () => {
     });
   });
 
+  it("summarizes a shell call by the agent's description, falling back to the command", () => {
+    const shellCall = {
+      toolName: "Bash",
+      status: "completed",
+      error: null,
+      resolveIcon: fakeResolveIcon,
+    } as const;
+
+    expect(
+      buildToolCallPresentation({
+        ...shellCall,
+        detail: { type: "shell", command: "grep -rn freescout .", description: "Find mentions" },
+      }).summary,
+    ).toBe("Find mentions");
+    expect(
+      buildToolCallPresentation({
+        ...shellCall,
+        detail: { type: "shell", command: "grep -rn freescout ." },
+      }).summary,
+    ).toBe("grep -rn freescout .");
+  });
+
   it("marks running calls without meaningful detail as loading details", () => {
     const presentation = buildToolCallPresentation({
       toolName: "exec_command",

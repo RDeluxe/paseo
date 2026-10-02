@@ -71,6 +71,23 @@ describe("claude tool-call mapper", () => {
     }
   });
 
+  it("keeps the agent's description of a shell call", () => {
+    const item = expectMapped(
+      mapClaudeRunningToolCall({
+        callId: "claude-call-described",
+        name: "Bash",
+        input: { command: "grep -rn freescout .", description: "Find every Freescout mention" },
+        output: null,
+      }),
+    );
+
+    expect(item.detail).toEqual({
+      type: "shell",
+      command: "grep -rn freescout .",
+      description: "Find every Freescout mention",
+    });
+  });
+
   it("maps partial running input through the same canonical detail path", () => {
     const item = expectMapped(
       mapClaudeRunningToolCall({
