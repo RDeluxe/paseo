@@ -1204,6 +1204,8 @@ export const ja: TranslationResources = {
         option: "{{count}} 日後",
         value: "{{count}}日",
       },
+      collapseAll: "すべて折りたたむ",
+      expandAll: "すべて展開",
       grouping: {
         label: "グループ化",
         project: "プロジェクト",

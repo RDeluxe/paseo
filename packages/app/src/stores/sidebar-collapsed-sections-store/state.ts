@@ -66,6 +66,33 @@ export function setProjectCollapsed(
   return { ...state, collapsedProjectKeys: next };
 }
 
+export interface CollapsibleSectionKeys {
+  projectKeys: readonly string[];
+  workspaceGroupKeys: readonly string[];
+}
+
+/** Folds every section the sidebar can show, whichever grouping is on screen. */
+export function collapseAllSections(
+  state: CollapsedProjectsState,
+  keys: CollapsibleSectionKeys,
+): CollapsedProjectsState {
+  return {
+    ...state,
+    collapsedProjectKeys: new Set(keys.projectKeys),
+    collapsedWorkspaceGroupKeys: new Set(keys.workspaceGroupKeys),
+    collapsedPinned: true,
+  };
+}
+
+export function expandAllSections(state: CollapsedProjectsState): CollapsedProjectsState {
+  return {
+    ...state,
+    collapsedProjectKeys: new Set(),
+    collapsedWorkspaceGroupKeys: new Set(),
+    collapsedPinned: false,
+  };
+}
+
 export function serializeCollapsedProjects(state: CollapsedProjectsState): {
   collapsedProjectKeys: string[];
   collapsedWorkspaceGroupKeys: string[];

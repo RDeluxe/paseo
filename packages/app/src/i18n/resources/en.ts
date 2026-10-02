@@ -1199,6 +1199,8 @@ export const en = {
         option: "After {{count}} days",
         value: "{{count}}d",
       },
+      collapseAll: "Collapse all",
+      expandAll: "Expand all",
       grouping: {
         label: "Grouping",
         project: "Project",
