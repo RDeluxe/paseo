@@ -76,6 +76,7 @@ import {
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+import { useIsCompactSidebar } from "@/components/sidebar/display-preferences/model";
 import type { ToggleSidebarWorkspacePin } from "@/hooks/use-sidebar-workspace-pin";
 import { DraggableList, type DraggableRenderItemInfo } from "@/components/draggable-list";
 import type { DraggableListDragHandleProps } from "@/components/draggable-list.types";
@@ -219,7 +220,7 @@ export function SidebarStatusWorkspaceList({
               />
               {canTogglePinnedWorkspaces ? (
                 <SidebarGroupToggleRow
-                  expanded={pinnedWorkspacesExpanded}
+                  action={pinnedWorkspacesExpanded ? "showLess" : "showMore"}
                   onPress={togglePinnedWorkspacesExpanded}
                   testID="sidebar-pinned-show-more"
                 />
@@ -367,7 +368,7 @@ function StatusGroupRows({
           ))}
           {canToggleWorkspaces ? (
             <SidebarGroupToggleRow
-              expanded={workspacesExpanded}
+              action={workspacesExpanded ? "showLess" : "showMore"}
               onPress={toggleWorkspacesExpanded}
               indented
               testID={`sidebar-status-group-show-more-${group.key}`}
@@ -824,6 +825,7 @@ function StatusWorkspaceRowInnerContent({
     endDragPress?.();
   }, [endDragPress]);
 
+  const compact = useIsCompactSidebar();
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
       {({ isHovered, contextMenuOpen, onContextMenuOpenChange, hoverHandlers }) => {
@@ -846,6 +848,7 @@ function StatusWorkspaceRowInnerContent({
           isPressed,
           selected,
           isHovered,
+          compact,
           inStatusGroup,
           isDragging,
         });
@@ -1016,17 +1019,20 @@ function getStatusWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  compact,
   inStatusGroup,
   isDragging,
 }: {
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  compact: boolean;
   inStatusGroup: boolean;
   isDragging: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && sidebarWorkspaceRowStyles.rowCompact,
     inStatusGroup && sidebarWorkspaceRowStyles.rowIndented,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,

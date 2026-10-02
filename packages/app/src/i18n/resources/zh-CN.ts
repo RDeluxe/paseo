@@ -1080,6 +1080,23 @@ export const zhCN: TranslationResources = {
     display: {
       trigger: "显示偏好",
       heading: "显示",
+      density: {
+        label: "密度",
+        comfortable: "宽松",
+        compact: "紧凑",
+      },
+      workspaceLimit: {
+        label: "每个项目",
+        option: "{{count}} 个工作区",
+      },
+      hideInactive: {
+        label: "隐藏不活跃的",
+        never: "从不",
+        option: "{{count}} 天后",
+        value: "{{count}} 天",
+      },
+      collapseAll: "全部折叠",
+      expandAll: "全部展开",
       grouping: {
         label: "分组",
         project: "项目",
@@ -1204,6 +1221,7 @@ export const zhCN: TranslationResources = {
         newWorkspace: "新建 workspace",
         showMore: "显示更多",
         showLess: "收起",
+        more: "更多",
         createWorkspaceFor: "为 {{projectName}} 新建 workspace",
         copyPath: "复制路径",
         copyBranchName: "复制分支名称",

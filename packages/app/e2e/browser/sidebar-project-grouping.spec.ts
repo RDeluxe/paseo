@@ -22,6 +22,7 @@ import {
 import { connectSeedClient, type SeedDaemonClient } from "../support/helpers/seed-client";
 import { getServerId } from "../support/helpers/server-id";
 import { createTempGitRepo } from "../support/helpers/workspace";
+import { selectSidebarDensity } from "../support/helpers/sidebar";
 
 const PRIMARY_HOST_LABEL = "Primary Host";
 const SECONDARY_HOST_LABEL = "Secondary Host";
@@ -409,6 +410,8 @@ test.describe("Sidebar project grouping", () => {
     crossHostProject,
   }) => {
     await openScenario(page, crossHostProject);
+    // Rows are counted by the host name under their title, which only the comfortable density keeps.
+    await selectSidebarDensity(page, "comfortable");
     await beginWorkspaceFromProject(page, GROUPED_PROJECT_NAME);
     await selectWorkspaceHost(page, SECONDARY_HOST_LABEL);
     await createWorkspaceWithoutAgent(page);

@@ -1095,6 +1095,23 @@ export const ko: TranslationResources = {
     display: {
       trigger: "표시 설정",
       heading: "표시",
+      density: {
+        label: "밀도",
+        comfortable: "여유 있게",
+        compact: "촘촘하게",
+      },
+      workspaceLimit: {
+        label: "프로젝트당",
+        option: "워크스페이스 {{count}}개",
+      },
+      hideInactive: {
+        label: "비활성 숨기기",
+        never: "안 함",
+        option: "{{count}}일 후",
+        value: "{{count}}일",
+      },
+      collapseAll: "모두 접기",
+      expandAll: "모두 펼치기",
       grouping: {
         label: "그룹화",
         project: "프로젝트",
@@ -1221,6 +1238,7 @@ export const ko: TranslationResources = {
         newWorkspace: "새 워크스페이스",
         showMore: "더 보기",
         showLess: "간략히 보기",
+        more: "더보기",
         createWorkspaceFor: "{{projectName}}을(를) 위한 새 워크스페이스 생성",
         copyPath: "경로 복사",
         copyBranchName: "브랜치 이름 복사",

@@ -1,5 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { getServerId } from "./server-id";
+import type { SidebarDensity } from "@/components/sidebar/display-preferences/density";
+import type { SidebarWorkspaceLimit } from "@/components/sidebar/display-preferences/project-limit";
 
 interface ContextMenuAnchor {
   x: number;
@@ -198,6 +200,29 @@ export async function closeSidebarDisplayPreferences(page: Page): Promise<void> 
 export async function selectSidebarStatusGrouping(page: Page): Promise<void> {
   await openSidebarDisplayPage(page, "sidebar-display-grouping");
   await page.getByTestId("sidebar-grouping-status").click();
+}
+
+export async function selectSidebarDensity(page: Page, density: SidebarDensity): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-density");
+  await page.getByTestId(`sidebar-density-${density}`).click();
+}
+
+export async function selectSidebarWorkspaceLimit(
+  page: Page,
+  limit: SidebarWorkspaceLimit,
+): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-workspace-limit");
+  await page.getByTestId(`sidebar-workspace-limit-${limit}`).click();
+}
+
+export async function collapseAllSidebarSections(page: Page): Promise<void> {
+  await page.getByTestId("sidebar-display-preferences-menu").click();
+  await page.getByTestId("sidebar-collapse-all").click();
+}
+
+export async function expandAllSidebarSections(page: Page): Promise<void> {
+  await page.getByTestId("sidebar-display-preferences-menu").click();
+  await page.getByTestId("sidebar-expand-all").click();
 }
 
 export async function openMobileAgentSidebar(page: Page): Promise<void> {

@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { View, type PressableStateCallbackType } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import {
@@ -21,6 +22,10 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  History,
+  ListFilter,
+  Rows3,
+  Rows4,
   Server,
   Settings2,
   Tag,
@@ -45,6 +50,8 @@ import { resolveSidebarProjectIconTargets } from "@/utils/sidebar-project-row-mo
 import { projectIconPlaceholderLabelFromDisplayName } from "@/utils/project-display-name";
 import type { SidebarProjectEntry } from "@/hooks/use-sidebar-workspaces-list";
 import type { Theme } from "@/styles/theme";
+import { useSidebarCollapsedSectionsStore } from "@/stores/sidebar-collapsed-sections-store";
+import { STATUS_BUCKET_ORDER } from "@/utils/sidebar-agent-state";
 import {
   hasActiveSidebarLabelFilter,
   SIDEBAR_UNLABELLED_LABEL_KEY,
@@ -53,6 +60,8 @@ import {
 import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/workspace-labels";
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
+import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
+import { SIDEBAR_HIDE_INACTIVE_DAYS, SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -120,6 +129,14 @@ const TRAILING_ICONS: Record<SidebarTrailingChoice, OptionIcon> = {
   timestamp: withUnistyles(Clock),
 };
 
+const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
+  comfortable: withUnistyles(Rows3),
+  compact: withUnistyles(Rows4),
+};
+
+const WORKSPACE_LIMIT_ICON: OptionIcon = withUnistyles(ListFilter);
+const HIDE_INACTIVE_ICON: OptionIcon = withUnistyles(History);
+
 const GROUPING_MODES: readonly SidebarGroupMode[] = ["project", "status"];
 const TITLE_SOURCES: readonly WorkspaceTitleSource[] = ["title", "branch"];
 const TRAILING_CHOICES: readonly SidebarTrailingChoice[] = ["diff", "timestamp"];
@@ -154,12 +171,18 @@ const TRAILING_LABEL_KEYS: Record<SidebarTrailingChoice, string> = {
   timestamp: "sidebar.display.show.timestamp",
 };
 
+const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
+  comfortable: "sidebar.display.density.comfortable",
+  compact: "sidebar.display.density.compact",
+};
+
 /**
  * What the sidebar shows and how it is arranged.
  *
  * The root is one row per decision with its current value; the options live a level down. The
  * shape is deliberate — every option of every decision on one surface is what this menu used to
- * be, and it grew a row for each host on top of that.
+ * be, and it grew a row for each host on top of that. The two rows at the very end are actions
+ * rather than decisions: they fold or unfold the whole list at once, and leave nothing to show.
  */
 export function SidebarDisplayPreferencesMenu(): ReactElement {
   const { t } = useTranslation();
@@ -188,6 +211,18 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   // catalog only counts hosts that are online, so a host dropping off would otherwise take away
   // the only way back to a filter that is still hiding workspaces.
   const showLabelFilter = labels.length > 0 || hasActiveSidebarLabelFilter(preferences.labelFilter);
+  // The limits act on project blocks; the status groups list every workspace they hold.
+  const showProjectLimit = preferences.grouping === "project";
+  const collapseAll = useSidebarCollapsedSectionsStore((state) => state.collapseAll);
+  const expandAll = useSidebarCollapsedSectionsStore((state) => state.expandAll);
+  const collapseAllSections = useCallback(
+    () =>
+      collapseAll({
+        projectKeys: allProjects.map((project) => project.viewKey),
+        workspaceGroupKeys: STATUS_BUCKET_ORDER,
+      }),
+    [allProjects, collapseAll],
+  );
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -225,6 +260,20 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
         content: <ShowPage preferences={preferences} />,
       },
       {
+        id: "density",
+        title: t("sidebar.display.density.label"),
+        content: (
+          <OptionList
+            values={SIDEBAR_DENSITIES}
+            icons={DENSITY_ICONS}
+            labelKeys={DENSITY_LABEL_KEYS}
+            selectedValue={preferences.density}
+            onSelect={preferences.setDensity}
+            testIDPrefix="sidebar-density"
+          />
+        ),
+      },
+      {
         id: "checks",
         title: t("sidebar.display.show.checks"),
         content: (
@@ -240,6 +289,38 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
       },
     ];
 
+    if (showProjectLimit) {
+      definitions.push(
+        {
+          id: "workspaceLimit",
+          title: t("sidebar.display.workspaceLimit.label"),
+          content: (
+            <CountOptionList
+              values={SIDEBAR_WORKSPACE_LIMITS}
+              icon={WORKSPACE_LIMIT_ICON}
+              labelKeys={WORKSPACE_LIMIT_LABEL_KEYS}
+              selectedValue={preferences.workspaceLimit}
+              onSelect={preferences.setWorkspaceLimit}
+              testIDPrefix="sidebar-workspace-limit"
+            />
+          ),
+        },
+        {
+          id: "hideInactive",
+          title: t("sidebar.display.hideInactive.label"),
+          content: (
+            <CountOptionList
+              values={SIDEBAR_HIDE_INACTIVE_DAYS}
+              icon={HIDE_INACTIVE_ICON}
+              labelKeys={HIDE_INACTIVE_LABEL_KEYS}
+              selectedValue={preferences.hideInactiveDays}
+              onSelect={preferences.setHideInactiveDays}
+              testIDPrefix="sidebar-hide-inactive"
+            />
+          ),
+        },
+      );
+    }
     if (showHostFilter) {
       definitions.push({
         id: "hostFilter",
@@ -274,6 +355,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     t,
     preferences,
     hosts,
+    showProjectLimit,
     showHostFilter,
     showProjectFilter,
     allProjects,
@@ -318,6 +400,32 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
           <MenuSubTrigger id="show" testID="sidebar-display-show">
             {t("sidebar.display.show.label")}
           </MenuSubTrigger>
+          <MenuSubTrigger
+            id="density"
+            value={t(DENSITY_LABEL_KEYS[preferences.density])}
+            testID="sidebar-display-density"
+          >
+            {t("sidebar.display.density.label")}
+          </MenuSubTrigger>
+          {showProjectLimit ? (
+            <>
+              <MenuSeparator />
+              <MenuSubTrigger
+                id="workspaceLimit"
+                value={String(preferences.workspaceLimit)}
+                testID="sidebar-display-workspace-limit"
+              >
+                {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+              <MenuSubTrigger
+                id="hideInactive"
+                value={countLabel(t, preferences.hideInactiveDays, HIDE_INACTIVE_VALUE_KEYS)}
+                testID="sidebar-display-hide-inactive"
+              >
+                {t("sidebar.display.hideInactive.label")}
+              </MenuSubTrigger>
+            </>
+          ) : null}
           {showHostFilter ? (
             <>
               <MenuSeparator />
@@ -359,6 +467,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
               </MenuSubTrigger>
             </>
           ) : null}
+          <MenuSeparator />
+          <MenuItem onSelect={collapseAllSections} testID="sidebar-collapse-all">
+            {t("sidebar.display.collapseAll")}
+          </MenuItem>
+          <MenuItem onSelect={expandAll} testID="sidebar-expand-all">
+            {t("sidebar.display.expandAll")}
+          </MenuItem>
         </MenuSurface>
       </MenuRoot>
       <WorkspaceLabelManagerModal visible={managerOpen} onClose={closeManager} />
@@ -474,7 +589,7 @@ function LabelFilterItem({
 type Preferences = ReturnType<typeof useSidebarDisplayPreferences>;
 
 /** One option row: its mark on the left, its label, and a check when it is the chosen one. */
-function OptionItem<Value extends string>({
+function OptionItem<Value extends string | number>({
   value,
   icon: Icon,
   label,
@@ -532,6 +647,59 @@ function OptionList<Value extends string>({
       value={value}
       icon={icons[value]}
       label={t(labelKeys[value])}
+      selected={value === selectedValue}
+      onSelect={onSelect}
+      testID={`${testIDPrefix}-${value}`}
+    />
+  ));
+}
+
+/** A count's label, with its own wording for 0 when 0 means "off" rather than a number. */
+interface CountLabelKeys {
+  count: string;
+  zero?: string;
+}
+
+const WORKSPACE_LIMIT_LABEL_KEYS: CountLabelKeys = {
+  count: "sidebar.display.workspaceLimit.option",
+};
+const HIDE_INACTIVE_LABEL_KEYS: CountLabelKeys = {
+  count: "sidebar.display.hideInactive.option",
+  zero: "sidebar.display.hideInactive.never",
+};
+const HIDE_INACTIVE_VALUE_KEYS: CountLabelKeys = {
+  count: "sidebar.display.hideInactive.value",
+  zero: "sidebar.display.hideInactive.never",
+};
+
+function countLabel(t: TFunction, value: number, keys: CountLabelKeys): string {
+  if (value === 0 && keys.zero) return t(keys.zero);
+  return t(keys.count, { count: value });
+}
+
+/** `OptionList` for numbers: the number is the option, so it goes into one label key. */
+function CountOptionList<Value extends number>({
+  values,
+  icon,
+  labelKeys,
+  selectedValue,
+  onSelect,
+  testIDPrefix,
+}: {
+  values: readonly Value[];
+  icon: OptionIcon;
+  labelKeys: CountLabelKeys;
+  selectedValue: Value;
+  onSelect: (value: Value) => void;
+  testIDPrefix: string;
+}): ReactNode {
+  const { t } = useTranslation();
+  return values.map((value) => (
+    <OptionItem
+      key={value}
+      value={value}
+      icon={icon}
+      label={countLabel(t, value, labelKeys)}
       selected={value === selectedValue}
       onSelect={onSelect}
       testID={`${testIDPrefix}-${value}`}

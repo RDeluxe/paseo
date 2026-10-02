@@ -1096,6 +1096,23 @@ export const en = {
     display: {
       trigger: "Display preferences",
       heading: "Display",
+      density: {
+        label: "Density",
+        comfortable: "Comfortable",
+        compact: "Compact",
+      },
+      workspaceLimit: {
+        label: "Per project",
+        option: "{{count}} workspaces",
+      },
+      hideInactive: {
+        label: "Hide inactive",
+        never: "Never",
+        option: "After {{count}} days",
+        value: "{{count}}d",
+      },
+      collapseAll: "Collapse all",
+      expandAll: "Expand all",
       grouping: {
         label: "Grouping",
         project: "Project",
@@ -1222,6 +1239,7 @@ export const en = {
         newWorkspace: "New workspace",
         showMore: "Show more",
         showLess: "Show less",
+        more: "More",
         createWorkspaceFor: "Create a new workspace for {{projectName}}",
         copyPath: "Copy path",
         copyBranchName: "Copy branch name",

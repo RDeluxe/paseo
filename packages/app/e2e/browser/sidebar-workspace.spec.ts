@@ -8,6 +8,7 @@ import {
   expectMobileAgentSidebarVisible,
   openMobileAgentSidebar,
   pinWorkspaceFromSidebar,
+  selectSidebarDensity,
 } from "../support/helpers/sidebar";
 import { seedWorkspace } from "../support/helpers/seed-client";
 import { expectWorkspaceHeader } from "../support/helpers/workspace-ui";
@@ -502,9 +503,14 @@ test.describe("Half-screen desktop layout", () => {
       }
 
       await gotoAppShell(page);
-      await page
-        .getByTestId(`sidebar-project-show-more-${projectEquivalenceViewKey(workspace.projectKey)}`)
-        .click();
+      // Twenty-five comfortable rows overflow this viewport; compact ones would not scroll.
+      await selectSidebarDensity(page, "comfortable");
+      // "More" adds ten rows per press: five shown, then fifteen, then all twenty-five.
+      const showMore = page.getByTestId(
+        `sidebar-project-show-more-${projectEquivalenceViewKey(workspace.projectKey)}`,
+      );
+      await showMore.click();
+      await showMore.click();
       await waitForSidebarWorkspace(page, lastWorkspaceId);
 
       const sidebarScroll = page.getByTestId("sidebar-project-workspace-list-scroll");
