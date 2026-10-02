@@ -39,6 +39,8 @@ test.describe("Sidebar project filter", () => {
         /^Hide inactive/,
         "Project",
         "Show background",
+        "Collapse all",
+        "Expand all",
       ]);
       await closeSidebarDisplayPreferences(page);
 

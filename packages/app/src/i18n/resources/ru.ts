@@ -1193,6 +1193,8 @@ export const ru: TranslationResources = {
         option: "Через {{count}} дн.",
         value: "{{count}} дн.",
       },
+      collapseAll: "Свернуть все",
+      expandAll: "Развернуть все",
       grouping: {
         label: "Группировка",
         project: "Проект",
