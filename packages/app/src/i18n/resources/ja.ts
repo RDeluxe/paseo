@@ -1104,6 +1104,7 @@ export const ja: TranslationResources = {
       density: {
         label: "表示密度",
         comfortable: "ゆったり",
+        semiCompact: "セミコンパクト",
         compact: "コンパクト",
       },
       workspaceLimit: {

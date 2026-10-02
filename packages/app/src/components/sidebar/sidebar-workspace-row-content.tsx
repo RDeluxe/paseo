@@ -11,6 +11,7 @@ import {
 import { WorkspaceHoverCard } from "@/components/workspace-hover-card";
 import type { HostBadgeModel } from "@/hosts/appearance";
 import { HostBadge } from "@/hosts/host-badge";
+import { hasCompactRows } from "@/components/sidebar/display-preferences/density";
 import type { SidebarWorkspaceEntry } from "@/hooks/use-sidebar-workspaces-list";
 import {
   hasSidebarWorkspaceTrailing,
@@ -127,14 +128,15 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
   // The workspace carries label names; their colors live in its host's catalog, so the row is
   // where the two meet — the meta line is handed finished definitions.
   const labels = useWorkspaceLabelDefinitions(workspace.serverId, workspace.labels);
-  // Compact rows are one line: the line under the title goes, and the host moves to the end of
-  // the title line as its bare glyph, next to the timestamp, so a row on another machine still
-  // says so. Whether a host shows at all stays the host's own setting: `hostBadge` is null when
-  // it is hidden.
+  // Tight rows move the host to the end of the title line as its bare glyph, next to the
+  // timestamp, so a row on another machine still says so without a word for it. Compact rows go
+  // on to drop the line under the title. Whether a host shows at all stays the host's own
+  // setting: `hostBadge` is null when it is hidden.
+  const hostOnTitle = hasCompactRows(sidebarDensity);
   const compact = sidebarDensity === "compact";
   const titleHostBadge = useMemo(
-    () => (compact && hostBadge ? { ...hostBadge, showLabel: false } : null),
-    [compact, hostBadge],
+    () => (hostOnTitle && hostBadge ? { ...hostBadge, showLabel: false } : null),
+    [hostOnTitle, hostBadge],
   );
   const workspaceBranchTextStyle = useMemo(
     () => [
@@ -181,7 +183,7 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             <WorkspaceMetaRow
               currentBranch={workspace.currentBranch}
               projectName={leadingProjectName}
-              hostBadge={hostBadge ?? null}
+              hostBadge={hostOnTitle ? null : (hostBadge ?? null)}
               prHint={workspace.prHint}
               serviceSummary={serviceSummary}
               labels={labels}

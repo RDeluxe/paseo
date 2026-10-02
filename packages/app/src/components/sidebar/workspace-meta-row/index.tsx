@@ -75,7 +75,7 @@ export function WorkspaceMetaRow({
   serviceSummary: WorkspaceServiceSummary | null;
   labels?: readonly WorkspaceLabelDefinition[];
 }) {
-  const { rowItems, checksDisplay } = useSidebarMetaPreferences();
+  const { rowItems, checksDisplay, condensed } = useSidebarMetaPreferences();
   const items = selectMetaRowItems({
     currentBranch,
     projectName,
@@ -84,7 +84,7 @@ export function WorkspaceMetaRow({
     serviceSummary,
     labels,
     visible: rowItems,
-    checksDisplay,
+    checksDisplay: condensed && checksDisplay === "iconAndText" ? "icon" : checksDisplay,
   });
 
   if (items.length === 0) return null;
@@ -93,8 +93,13 @@ export function WorkspaceMetaRow({
     <View style={styles.row}>
       {items.map((item, index) => (
         <Fragment key={item.kind}>
-          {index > 0 ? <Text style={styles.separator}>·</Text> : null}
-          <MetaItemNode item={item} hostBadge={hostBadge} leading={index === 0} />
+          {index > 0 && !condensed ? <Text style={styles.separator}>·</Text> : null}
+          <MetaItemNode
+            item={item}
+            hostBadge={hostBadge}
+            leading={index === 0}
+            condensed={condensed}
+          />
         </Fragment>
       ))}
     </View>
@@ -105,11 +110,13 @@ function MetaItemNode({
   item,
   hostBadge,
   leading,
+  condensed,
 }: {
   item: MetaRowItem;
   hostBadge: HostBadgeModel | null;
   /** First on the line, so this item's ink sets the rail the title above it already uses. */
   leading: boolean;
+  condensed: boolean;
 }): ReactNode {
   if (item.kind === "branch") {
     return <IdentityItem kind="branch" name={item.name} />;
@@ -121,7 +128,7 @@ function MetaItemNode({
     return hostBadge ? <HostBadge badge={hostBadge} /> : null;
   }
   if (item.kind === "changeRequest") {
-    return <PullRequestItem hint={item.hint} />;
+    return <PullRequestItem hint={item.hint} showState={!condensed} />;
   }
   if (item.kind === "checks") {
     return <ChecksItem summary={item.summary} label={item.label} />;
@@ -184,8 +191,11 @@ function LabelsItem({
  * docs/hover.md — the state never leaves this Pressable, and nothing pressable is nested
  * inside it, so there is no second hover state machine to fight. Both icons are the same
  * size, so the swap can't move the target out from under the cursor.
+ *
+ * `showState` off leaves the state to the glyph: merged, closed and open each draw their own
+ * icon in their own colour, which is enough once space is what the row is short of.
  */
-function PullRequestItem({ hint }: { hint: PrHint }) {
+function PullRequestItem({ hint, showState }: { hint: PrHint; showState: boolean }) {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState(false);
   const presentation = getForgePresentation(normalizeForge(hint.forge));
@@ -224,7 +234,7 @@ function PullRequestItem({ hint }: { hint: PrHint }) {
         {hint.number}
         {/* An open change request is the unremarkable case and says nothing extra; a merged
             or closed one is why the row still looks like it has work in it. */}
-        {hint.state === "open" ? "" : ` ${t(PR_STATE_LABEL_KEYS[hint.state])}`}
+        {hint.state === "open" || !showState ? "" : ` ${t(PR_STATE_LABEL_KEYS[hint.state])}`}
       </Text>
     </Pressable>
   );
