@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { View, type PressableStateCallbackType } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import {
@@ -21,6 +22,7 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  ListFilter,
   Rows3,
   Rows4,
   Server,
@@ -56,6 +58,7 @@ import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
+import { SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -127,6 +130,8 @@ const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
   comfortable: withUnistyles(Rows3),
   compact: withUnistyles(Rows4),
 };
+
+const WORKSPACE_LIMIT_ICON: OptionIcon = withUnistyles(ListFilter);
 
 const GROUPING_MODES: readonly SidebarGroupMode[] = ["project", "status"];
 const TITLE_SOURCES: readonly WorkspaceTitleSource[] = ["title", "branch"];
@@ -201,6 +206,8 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   // catalog only counts hosts that are online, so a host dropping off would otherwise take away
   // the only way back to a filter that is still hiding workspaces.
   const showLabelFilter = labels.length > 0 || hasActiveSidebarLabelFilter(preferences.labelFilter);
+  // The limits act on project blocks; the status groups list every workspace they hold.
+  const showProjectLimit = preferences.grouping === "project";
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -267,6 +274,22 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
       },
     ];
 
+    if (showProjectLimit) {
+      definitions.push({
+        id: "workspaceLimit",
+        title: t("sidebar.display.workspaceLimit.label"),
+        content: (
+          <CountOptionList
+            values={SIDEBAR_WORKSPACE_LIMITS}
+            icon={WORKSPACE_LIMIT_ICON}
+            labelKeys={WORKSPACE_LIMIT_LABEL_KEYS}
+            selectedValue={preferences.workspaceLimit}
+            onSelect={preferences.setWorkspaceLimit}
+            testIDPrefix="sidebar-workspace-limit"
+          />
+        ),
+      });
+    }
     if (showHostFilter) {
       definitions.push({
         id: "hostFilter",
@@ -301,6 +324,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     t,
     preferences,
     hosts,
+    showProjectLimit,
     showHostFilter,
     showProjectFilter,
     allProjects,
@@ -352,6 +376,18 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
           >
             {t("sidebar.display.density.label")}
           </MenuSubTrigger>
+          {showProjectLimit ? (
+            <>
+              <MenuSeparator />
+              <MenuSubTrigger
+                id="workspaceLimit"
+                value={String(preferences.workspaceLimit)}
+                testID="sidebar-display-workspace-limit"
+              >
+                {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+            </>
+          ) : null}
           {showHostFilter ? (
             <>
               <MenuSeparator />
@@ -508,7 +544,7 @@ function LabelFilterItem({
 type Preferences = ReturnType<typeof useSidebarDisplayPreferences>;
 
 /** One option row: its mark on the left, its label, and a check when it is the chosen one. */
-function OptionItem<Value extends string>({
+function OptionItem<Value extends string | number>({
   value,
   icon: Icon,
   label,
@@ -566,6 +602,49 @@ function OptionList<Value extends string>({
       value={value}
       icon={icons[value]}
       label={t(labelKeys[value])}
+      selected={value === selectedValue}
+      onSelect={onSelect}
+      testID={`${testIDPrefix}-${value}`}
+    />
+  ));
+}
+
+/** A count's label key; the number is interpolated as `count`. */
+interface CountLabelKeys {
+  count: string;
+}
+
+const WORKSPACE_LIMIT_LABEL_KEYS: CountLabelKeys = {
+  count: "sidebar.display.workspaceLimit.option",
+};
+
+function countLabel(t: TFunction, value: number, keys: CountLabelKeys): string {
+  return t(keys.count, { count: value });
+}
+
+/** `OptionList` for numbers: the number is the option, so it goes into one label key. */
+function CountOptionList<Value extends number>({
+  values,
+  icon,
+  labelKeys,
+  selectedValue,
+  onSelect,
+  testIDPrefix,
+}: {
+  values: readonly Value[];
+  icon: OptionIcon;
+  labelKeys: CountLabelKeys;
+  selectedValue: Value;
+  onSelect: (value: Value) => void;
+  testIDPrefix: string;
+}): ReactNode {
+  const { t } = useTranslation();
+  return values.map((value) => (
+    <OptionItem
+      key={value}
+      value={value}
+      icon={icon}
+      label={countLabel(t, value, labelKeys)}
       selected={value === selectedValue}
       onSelect={onSelect}
       testID={`${testIDPrefix}-${value}`}

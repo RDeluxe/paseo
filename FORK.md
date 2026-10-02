@@ -41,6 +41,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/compact-density`.
 - **Règle d'abandon :** si upstream ajoute une densité compacte, prendre la leur.
 
+### Limite par projet et « More » à la Cursor
+
+- **Objectif :** qu'un projet avec un long historique (jusqu'à 200 conversations importées de Cursor) n'écrase pas ceux du dessous. On ne voit que ses derniers workspaces, et on en dévoile plus à la demande, par pages, comme dans Cursor.
+- **Comportement :** 3, 5, 10 ou 20 workspaces par projet, 5 par défaut. Sous la limite, une ligne « More » discrète, sans flèche. Chaque clic affiche 10 workspaces de plus, et la ligne disparaît quand tout est visible (pas de « Show less »). Le workspace affiché à l'écran reste toujours visible. Le réglage n'apparaît qu'en regroupement par projet.
+- **Où :** `display-preferences/project-limit.ts` ; le réglage `sidebarWorkspaceLimit` ; `sidebar/limited-sidebar-group.ts` (logique pure) ; le hook `sidebar/use-paged-sidebar-group.ts` (le `useLimitedSidebarGroup` d'upstream reste intact pour les épinglés et les groupes de statut) ; `ProjectBlock` dans `sidebar-workspace-list.tsx` ; l'action `"more"` de `SidebarGroupToggleRow`.
+- **Preuve :** `e2e/browser/sidebar-project-limit.spec.ts`, `sidebar/limited-sidebar-group.test.ts`, `hooks/use-settings/storage.test.ts`. Le test de défilement d'upstream (`sidebar-workspace.spec.ts`) clique deux fois sur « More » pour afficher ses 25 workspaces.
+- **Commit d'origine :** `feature/project-workspace-limit`.
+- **Règle d'abandon :** si upstream rend la limite réglable avec un « More » paginé, prendre le leur. Si la limite devient réglable mais avec un simple déplier/replier, garder notre « More » et me prévenir.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
