@@ -88,6 +88,8 @@ function projectionInput(options?: {
     collapsedWorkspaceGroupKeys: new Set<string>(),
     t: i18n.t,
     workspaceLimit: 20,
+    hideInactiveDays: 0 as const,
+    now: Date.UTC(2026, 9, 2),
   };
 }
 
@@ -178,13 +180,16 @@ describe("buildSidebarProjection", () => {
   });
 
   it("numbers only the rows each project shows before More", () => {
-    const own = ["a", "b", "c", "d"].map((id) => makeWorkspace(id, "running"));
+    const now = Date.UTC(2026, 9, 2);
+    const fresh = ["a", "b", "c", "d"].map((id) => makeWorkspace(id, "running"));
+    const stale = makeWorkspace("stale");
+    stale.entry.statusEnteredAt = new Date(now - 30 * 24 * 60 * 60 * 1000);
     const other = makeWorkspace("other", "running", [], "other-project");
-    const all = [...own, other];
+    const all = [stale, ...fresh, other];
     const projection = buildSidebarProjection({
       ...projectionInput(),
       projects: [
-        makeProject(own.map((workspace) => workspace.placement)),
+        makeProject([stale.placement, ...fresh.map((workspace) => workspace.placement)]),
         makeProject([other.placement], "other-project"),
       ],
       pinnedKeys: { pinnedWorkspaceKeys: [], pinnedAtByKey: {} },
@@ -192,6 +197,8 @@ describe("buildSidebarProjection", () => {
         all.map((workspace) => [workspace.entry.workspaceKey, workspace.entry]),
       ),
       workspaceLimit: 3,
+      hideInactiveDays: 14,
+      now,
     });
 
     expect(projection.shortcutModel.shortcutTargets.map((target) => target.workspaceId)).toEqual([

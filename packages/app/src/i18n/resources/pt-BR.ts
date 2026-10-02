@@ -1196,6 +1196,12 @@ export const ptBR: TranslationResources = {
         label: "Por projeto",
         option: "{{count}} workspaces",
       },
+      hideInactive: {
+        label: "Ocultar inativos",
+        never: "Nunca",
+        option: "Após {{count}} dias",
+        value: "{{count}} d",
+      },
       grouping: {
         label: "Agrupamento",
         project: "Projeto",

@@ -19,8 +19,11 @@ import {
   type SidebarDensity,
 } from "@/components/sidebar/display-preferences/density";
 import {
+  DEFAULT_SIDEBAR_HIDE_INACTIVE_DAYS,
   DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
+  SIDEBAR_HIDE_INACTIVE_DAYS,
   SIDEBAR_WORKSPACE_LIMITS,
+  type SidebarHideInactiveDays,
   type SidebarWorkspaceLimit,
 } from "@/components/sidebar/display-preferences/project-limit";
 import {
@@ -107,6 +110,8 @@ export interface AppSettings {
   sidebarDensity: SidebarDensity;
   /** Workspaces a project shows before "More". */
   sidebarWorkspaceLimit: SidebarWorkspaceLimit;
+  /** Finished workspaces untouched for longer than this go behind "More". */
+  sidebarHideInactiveDays: SidebarHideInactiveDays;
   /** Top-level sidebar rows in display order; empty means the default order, all visible. */
   sidebarNavItems: SidebarNavPreference[];
   /** Sidebar footer items in display order; empty means the default order, all visible. */
@@ -168,6 +173,7 @@ export const DEFAULT_CLIENT_SETTINGS: AppSettings = {
   sidebarChecksDisplay: DEFAULT_SIDEBAR_CHECKS_DISPLAY,
   sidebarDensity: DEFAULT_SIDEBAR_DENSITY,
   sidebarWorkspaceLimit: DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
+  sidebarHideInactiveDays: DEFAULT_SIDEBAR_HIDE_INACTIVE_DAYS,
   sidebarNavItems: [],
   sidebarFooterItems: [],
   usage: DEFAULT_USAGE_PREFERENCES,
@@ -267,6 +273,9 @@ const StoredAppSettingsSchema = z
     sidebarWorkspaceLimit: z
       .literal(SIDEBAR_WORKSPACE_LIMITS)
       .catch(DEFAULT_SIDEBAR_WORKSPACE_LIMIT),
+    sidebarHideInactiveDays: z
+      .literal(SIDEBAR_HIDE_INACTIVE_DAYS)
+      .catch(DEFAULT_SIDEBAR_HIDE_INACTIVE_DAYS),
     sidebarNavItems: z.array(z.object({ key: z.string(), visible: z.boolean() })).catch([]),
     sidebarFooterItems: z.array(z.object({ key: z.string(), visible: z.boolean() })).catch([]),
     usage: UsagePreferencesSchema,

@@ -18,6 +18,7 @@ import { useSidebarOrderStore } from "@/stores/sidebar-order-store";
 import type { SidebarShortcutModel } from "@/utils/sidebar-shortcuts";
 import { buildSidebarProjection } from "./sidebar-projection";
 import { useSidebarProjectLimit } from "./display-preferences/model";
+import { useStaleClock } from "./use-stale-clock";
 import type { SidebarProjectIconTarget } from "@/utils/sidebar-project-row-model";
 import { filterWorkspacesByLabels, type SidebarWorkspaceGroup } from "./sidebar-labels";
 import { filterWorkspacesByProjects, resolveActiveProjectFilters } from "./sidebar-project-filter";
@@ -149,7 +150,8 @@ export function SidebarModelProvider({
     visibleWorkspaceKeys,
   ]);
   const pinnedKeys = usePinnedSidebarKeys(filteredProjects);
-  const { workspaceLimit } = useSidebarProjectLimit();
+  const { workspaceLimit, hideInactiveDays } = useSidebarProjectLimit();
+  const staleClock = useStaleClock();
   const projectionInput = useMemo(
     () => ({
       projects: filteredProjects,
@@ -163,9 +165,13 @@ export function SidebarModelProvider({
       collapsedWorkspaceGroupKeys,
       t,
       workspaceLimit,
+      hideInactiveDays,
+      now: staleClock,
     }),
     [
       workspaceLimit,
+      hideInactiveDays,
+      staleClock,
       collapsedProjectKeys,
       collapsedWorkspaceGroupKeys,
       groupMode,
