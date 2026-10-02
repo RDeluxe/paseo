@@ -1100,6 +1100,10 @@ export const ko: TranslationResources = {
         comfortable: "여유 있게",
         compact: "촘촘하게",
       },
+      workspaceLimit: {
+        label: "프로젝트당",
+        option: "워크스페이스 {{count}}개",
+      },
       grouping: {
         label: "그룹화",
         project: "프로젝트",
@@ -1226,6 +1230,7 @@ export const ko: TranslationResources = {
         newWorkspace: "새 워크스페이스",
         showMore: "더 보기",
         showLess: "간략히 보기",
+        more: "더보기",
         createWorkspaceFor: "{{projectName}}을(를) 위한 새 워크스페이스 생성",
         copyPath: "경로 복사",
         copyBranchName: "브랜치 이름 복사",
