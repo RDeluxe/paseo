@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { View, type PressableStateCallbackType } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import {
@@ -21,6 +22,10 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  History,
+  ListFilter,
+  Rows3,
+  Rows4,
   Server,
   Settings2,
   Tag,
@@ -45,6 +50,8 @@ import { resolveSidebarProjectIconTargets } from "@/utils/sidebar-project-row-mo
 import { projectIconPlaceholderLabelFromDisplayName } from "@/utils/project-display-name";
 import type { SidebarProjectEntry } from "@/hooks/use-sidebar-workspaces-list";
 import type { Theme } from "@/styles/theme";
+import { useSidebarCollapsedSectionsStore } from "@/stores/sidebar-collapsed-sections-store";
+import { STATUS_BUCKET_ORDER } from "@/utils/sidebar-agent-state";
 import {
   hasActiveSidebarLabelFilter,
   SIDEBAR_UNLABELLED_LABEL_KEY,
@@ -53,6 +60,12 @@ import {
 import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/workspace-labels";
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
+import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
+import {
+  SIDEBAR_HIDE_INACTIVE_DAYS,
+  SIDEBAR_WORKSPACE_LIMITS,
+  type SidebarHideInactiveDays,
+} from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -120,6 +133,14 @@ const TRAILING_ICONS: Record<SidebarTrailingChoice, OptionIcon> = {
   timestamp: withUnistyles(Clock),
 };
 
+const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
+  comfortable: withUnistyles(Rows3),
+  compact: withUnistyles(Rows4),
+};
+
+const WORKSPACE_LIMIT_ICON: OptionIcon = withUnistyles(ListFilter);
+const HIDE_INACTIVE_ICON: OptionIcon = withUnistyles(History);
+
 const GROUPING_MODES: readonly SidebarGroupMode[] = ["project", "status"];
 const TITLE_SOURCES: readonly WorkspaceTitleSource[] = ["title", "branch"];
 const TRAILING_CHOICES: readonly SidebarTrailingChoice[] = ["diff", "timestamp"];
@@ -152,6 +173,11 @@ const CHECKS_DISPLAY_LABEL_KEYS: Record<SidebarChecksDisplay, string> = {
 const TRAILING_LABEL_KEYS: Record<SidebarTrailingChoice, string> = {
   diff: "sidebar.display.show.diff",
   timestamp: "sidebar.display.show.timestamp",
+};
+
+const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
+  comfortable: "sidebar.display.density.comfortable",
+  compact: "sidebar.display.density.compact",
 };
 
 /**
@@ -188,6 +214,18 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   // catalog only counts hosts that are online, so a host dropping off would otherwise take away
   // the only way back to a filter that is still hiding workspaces.
   const showLabelFilter = labels.length > 0 || hasActiveSidebarLabelFilter(preferences.labelFilter);
+  // The limits act on project blocks; the status groups list every workspace they hold.
+  const showProjectLimit = preferences.grouping === "project";
+  const collapseAll = useSidebarCollapsedSectionsStore((state) => state.collapseAll);
+  const expandAll = useSidebarCollapsedSectionsStore((state) => state.expandAll);
+  const collapseAllSections = useCallback(
+    () =>
+      collapseAll({
+        projectKeys: allProjects.map((project) => project.viewKey),
+        workspaceGroupKeys: STATUS_BUCKET_ORDER,
+      }),
+    [allProjects, collapseAll],
+  );
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -225,6 +263,20 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
         content: <ShowPage preferences={preferences} />,
       },
       {
+        id: "density",
+        title: t("sidebar.display.density.label"),
+        content: (
+          <OptionList
+            values={SIDEBAR_DENSITIES}
+            icons={DENSITY_ICONS}
+            labelKeys={DENSITY_LABEL_KEYS}
+            selectedValue={preferences.density}
+            onSelect={preferences.setDensity}
+            testIDPrefix="sidebar-density"
+          />
+        ),
+      },
+      {
         id: "checks",
         title: t("sidebar.display.show.checks"),
         content: (
@@ -240,6 +292,20 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
       },
     ];
 
+    if (showProjectLimit) {
+      definitions.push(
+        {
+          id: "workspaceLimit",
+          title: t("sidebar.display.workspaceLimit.label"),
+          content: <WorkspaceLimitPage preferences={preferences} />,
+        },
+        {
+          id: "hideInactive",
+          title: t("sidebar.display.hideInactive.label"),
+          content: <HideInactivePage preferences={preferences} />,
+        },
+      );
+    }
     if (showHostFilter) {
       definitions.push({
         id: "hostFilter",
@@ -274,6 +340,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     t,
     preferences,
     hosts,
+    showProjectLimit,
     showHostFilter,
     showProjectFilter,
     allProjects,
@@ -318,6 +385,32 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
           <MenuSubTrigger id="show" testID="sidebar-display-show">
             {t("sidebar.display.show.label")}
           </MenuSubTrigger>
+          <MenuSubTrigger
+            id="density"
+            value={t(DENSITY_LABEL_KEYS[preferences.density])}
+            testID="sidebar-display-density"
+          >
+            {t("sidebar.display.density.label")}
+          </MenuSubTrigger>
+          {showProjectLimit ? (
+            <>
+              <MenuSeparator />
+              <MenuSubTrigger
+                id="workspaceLimit"
+                value={String(preferences.workspaceLimit)}
+                testID="sidebar-display-workspace-limit"
+              >
+                {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+              <MenuSubTrigger
+                id="hideInactive"
+                value={hideInactiveValue(t, preferences.hideInactiveDays)}
+                testID="sidebar-display-hide-inactive"
+              >
+                {t("sidebar.display.hideInactive.label")}
+              </MenuSubTrigger>
+            </>
+          ) : null}
           {showHostFilter ? (
             <>
               <MenuSeparator />
@@ -359,6 +452,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
               </MenuSubTrigger>
             </>
           ) : null}
+          <MenuSeparator />
+          <MenuItem onSelect={collapseAllSections} testID="sidebar-collapse-all">
+            {t("sidebar.display.collapseAll")}
+          </MenuItem>
+          <MenuItem onSelect={expandAll} testID="sidebar-expand-all">
+            {t("sidebar.display.expandAll")}
+          </MenuItem>
         </MenuSurface>
       </MenuRoot>
       <WorkspaceLabelManagerModal visible={managerOpen} onClose={closeManager} />
@@ -474,7 +574,7 @@ function LabelFilterItem({
 type Preferences = ReturnType<typeof useSidebarDisplayPreferences>;
 
 /** One option row: its mark on the left, its label, and a check when it is the chosen one. */
-function OptionItem<Value extends string>({
+function OptionItem<Value extends string | number>({
   value,
   icon: Icon,
   label,
@@ -537,6 +637,55 @@ function OptionList<Value extends string>({
       testID={`${testIDPrefix}-${value}`}
     />
   ));
+}
+
+/** The number in each label is the option, so the page lists them rather than mapping keys. */
+function WorkspaceLimitPage({ preferences }: { preferences: Preferences }): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <>
+      {SIDEBAR_WORKSPACE_LIMITS.map((limit) => (
+        <OptionItem
+          key={limit}
+          value={limit}
+          icon={WORKSPACE_LIMIT_ICON}
+          label={t("sidebar.display.workspaceLimit.option", { count: limit })}
+          selected={preferences.workspaceLimit === limit}
+          onSelect={preferences.setWorkspaceLimit}
+          testID={`sidebar-workspace-limit-${limit}`}
+        />
+      ))}
+    </>
+  );
+}
+
+function HideInactivePage({ preferences }: { preferences: Preferences }): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <>
+      {SIDEBAR_HIDE_INACTIVE_DAYS.map((days) => (
+        <OptionItem
+          key={days}
+          value={days}
+          icon={HIDE_INACTIVE_ICON}
+          label={hideInactiveOption(t, days)}
+          selected={preferences.hideInactiveDays === days}
+          onSelect={preferences.setHideInactiveDays}
+          testID={`sidebar-hide-inactive-${days}`}
+        />
+      ))}
+    </>
+  );
+}
+
+function hideInactiveOption(t: TFunction, days: SidebarHideInactiveDays): string {
+  if (days === 0) return t("sidebar.display.hideInactive.never");
+  return t("sidebar.display.hideInactive.option", { count: days });
+}
+
+function hideInactiveValue(t: TFunction, days: SidebarHideInactiveDays): string {
+  if (days === 0) return t("sidebar.display.hideInactive.never");
+  return t("sidebar.display.hideInactive.value", { count: days });
 }
 
 /**

@@ -1105,6 +1105,23 @@ export const ru: TranslationResources = {
     display: {
       trigger: "Настройки отображения",
       heading: "Отображение",
+      density: {
+        label: "Плотность",
+        comfortable: "Свободная",
+        compact: "Компактная",
+      },
+      workspaceLimit: {
+        label: "На проект",
+        option: "Рабочих пространств: {{count}}",
+      },
+      hideInactive: {
+        label: "Скрывать неактивные",
+        never: "Никогда",
+        option: "Через {{count}} дн.",
+        value: "{{count}} дн.",
+      },
+      collapseAll: "Свернуть все",
+      expandAll: "Развернуть все",
       grouping: {
         label: "Группировка",
         project: "Проект",
@@ -1232,6 +1249,7 @@ export const ru: TranslationResources = {
         newWorkspace: "Новое рабочее пространство",
         showMore: "Показать ещё",
         showLess: "Показать меньше",
+        more: "Ещё",
         createWorkspaceFor: "Создать новое рабочее пространство для {{projectName}}",
         copyPath: "Копировать путь",
         copyBranchName: "Скопировать имя ветки",

@@ -1114,6 +1114,23 @@ export const ptBR: TranslationResources = {
     display: {
       trigger: "Preferências de exibição",
       heading: "Exibição",
+      density: {
+        label: "Densidade",
+        comfortable: "Confortável",
+        compact: "Compacta",
+      },
+      workspaceLimit: {
+        label: "Por projeto",
+        option: "{{count}} workspaces",
+      },
+      hideInactive: {
+        label: "Ocultar inativos",
+        never: "Nunca",
+        option: "Após {{count}} dias",
+        value: "{{count}} d",
+      },
+      collapseAll: "Recolher tudo",
+      expandAll: "Expandir tudo",
       grouping: {
         label: "Agrupamento",
         project: "Projeto",
@@ -1240,6 +1257,7 @@ export const ptBR: TranslationResources = {
         newWorkspace: "Novo workspace",
         showMore: "Mostrar mais",
         showLess: "Mostrar menos",
+        more: "Mais",
         createWorkspaceFor: "Criar um novo workspace para {{projectName}}",
         copyPath: "Copiar caminho",
         copyBranchName: "Copiar nome da branch",

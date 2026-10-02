@@ -200,6 +200,29 @@ export async function selectSidebarStatusGrouping(page: Page): Promise<void> {
   await page.getByTestId("sidebar-grouping-status").click();
 }
 
+export async function selectSidebarDensity(
+  page: Page,
+  density: "comfortable" | "compact",
+): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-density");
+  await page.getByTestId(`sidebar-density-${density}`).click();
+}
+
+export async function selectSidebarWorkspaceLimit(page: Page, limit: number): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-workspace-limit");
+  await page.getByTestId(`sidebar-workspace-limit-${limit}`).click();
+}
+
+export async function collapseAllSidebarSections(page: Page): Promise<void> {
+  await page.getByTestId("sidebar-display-preferences-menu").click();
+  await page.getByTestId("sidebar-collapse-all").click();
+}
+
+export async function expandAllSidebarSections(page: Page): Promise<void> {
+  await page.getByTestId("sidebar-display-preferences-menu").click();
+  await page.getByTestId("sidebar-expand-all").click();
+}
+
 export async function openMobileAgentSidebar(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Open menu" }).click();
 }

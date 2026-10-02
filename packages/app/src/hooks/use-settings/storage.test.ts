@@ -732,6 +732,38 @@ describe("appearance settings", () => {
     expect((await loadAppSettingsFromStorage(deps)).sidebarChecksDisplay).toBe("icon");
   });
 
+  it("restores the stored sidebar density and project limits", async () => {
+    const deps = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({
+          sidebarDensity: "comfortable",
+          sidebarWorkspaceLimit: 10,
+          sidebarHideInactiveDays: 0,
+        }),
+      }),
+    });
+
+    const settings = await loadAppSettingsFromStorage(deps);
+    expect(settings.sidebarDensity).toBe("comfortable");
+    expect(settings.sidebarWorkspaceLimit).toBe(10);
+    expect(settings.sidebarHideInactiveDays).toBe(0);
+  });
+
+  it("falls back to the default project limits for values outside the choices", async () => {
+    const deps = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({
+          sidebarWorkspaceLimit: 7,
+          sidebarHideInactiveDays: 2,
+        }),
+      }),
+    });
+
+    const settings = await loadAppSettingsFromStorage(deps);
+    expect(settings.sidebarWorkspaceLimit).toBe(5);
+    expect(settings.sidebarHideInactiveDays).toBe(14);
+  });
+
   it("uses a 15px mobile base and a 14px web base", () => {
     expect(defaultUiBaseFontSize(true)).toBe(15);
     expect(defaultUiBaseFontSize(false)).toBe(14);

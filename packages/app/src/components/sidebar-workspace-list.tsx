@@ -86,7 +86,11 @@ import { ProjectLeadingVisual } from "@/components/sidebar/project-leading-visua
 import { useToast } from "@/contexts/toast-context";
 import { getForgePresentation, normalizeForge } from "@/git/forge";
 import { toWorktreeArchiveRisk } from "@/git/worktree-archive-warning";
-import { hasVisibleOrderChanged, mergeWithRemainder } from "@/utils/sidebar-reorder";
+import {
+  hasVisibleOrderChanged,
+  mergeIntoVisibleSlots,
+  mergeWithRemainder,
+} from "@/utils/sidebar-reorder";
 import { confirmDialog } from "@/utils/confirm-dialog";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
 import { SidebarStatusWorkspaceList } from "@/components/sidebar/sidebar-status-list";
@@ -99,7 +103,9 @@ import { useLongPressDragInteraction } from "@/components/sidebar/use-long-press
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+import { projectWorkspaceGroupOptions } from "@/components/sidebar/limited-sidebar-group";
 import {
+  sidebarWorkspaceRowStyles,
   SidebarWorkspaceRowFrame,
   SidebarWorkspaceRowContent,
   SidebarWorkspaceShortcutBadge,
@@ -149,7 +155,11 @@ import { OpenInFileManagerMenuItem } from "@/workspace/open-in-file-manager/menu
 import { useLocalDaemonServerId } from "@/hooks/use-is-local-daemon";
 import type { HostBadgeModel } from "@/hosts/appearance";
 import { useHostBadges } from "@/hosts/use-host-badges";
-import { useSidebarRowItems } from "@/components/sidebar/display-preferences/model";
+import {
+  useIsCompactSidebar,
+  useSidebarProjectLimit,
+  useSidebarRowItems,
+} from "@/components/sidebar/display-preferences/model";
 import { PullRequestStateIcon } from "@/git/pull-request-state-icon";
 
 const workspaceKeyExtractor = (workspace: SidebarWorkspacePlacement) => workspace.workspaceKey;
@@ -364,14 +374,17 @@ function getProjectWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  compact,
 }: {
   isDragging: boolean;
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  compact: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && sidebarWorkspaceRowStyles.rowCompact,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
     isDragging && styles.workspaceRowDragging,
@@ -929,15 +942,17 @@ function ProjectHeaderRow({
     interaction.handlePressOut();
   }, [interaction]);
 
+  const compact = useIsCompactSidebar();
   const projectRowStyle = useCallback(
     ({ pressed }: PressableStateCallbackType) => [
       styles.projectRow,
+      compact && styles.projectRowCompact,
       isDragging && styles.projectRowDragging,
       selected && styles.sidebarRowSelected,
       isHovered && styles.projectRowHovered,
       pressed && styles.projectRowPressed,
     ],
-    [isDragging, selected, isHovered],
+    [compact, isDragging, selected, isHovered],
   );
 
   const rowChildren = (
@@ -1110,6 +1125,7 @@ function WorkspaceRowInner({
   }, [interaction]);
 
   const accessibilityState = useMemo(() => ({ selected }), [selected]);
+  const compact = useIsCompactSidebar();
 
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
@@ -1121,6 +1137,7 @@ function WorkspaceRowInner({
           isPressed,
           selected,
           isHovered,
+          compact,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -1540,6 +1557,9 @@ function WorkspaceRow({
   );
 }
 
+/** Each press of a project's "More" shows this many more workspaces. */
+const MORE_PAGE_SIZE = 10;
+
 function ProjectBlock({
   project,
   workspaceEntriesByKey,
@@ -1591,12 +1611,26 @@ function ProjectBlock({
   supportsPinningByServerId: ReadonlyMap<string, boolean>;
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
 }) {
+  const { workspaceLimit, hideInactiveDays } = useSidebarProjectLimit();
+  const workspaceGroupOptions = useMemo(
+    () => ({
+      ...projectWorkspaceGroupOptions({
+        limit: workspaceLimit,
+        hideInactiveDays,
+        entriesByKey: workspaceEntriesByKey,
+        selection: activeWorkspaceSelection,
+        now: Date.now(),
+      }),
+      pageSize: MORE_PAGE_SIZE,
+    }),
+    [workspaceLimit, hideInactiveDays, workspaceEntriesByKey, activeWorkspaceSelection],
+  );
   const {
     visibleItems: visibleWorkspaces,
-    expanded: workspacesExpanded,
     canToggle: canToggleWorkspaces,
-    toggleExpanded: toggleWorkspacesExpanded,
-  } = useLimitedSidebarGroup(project.workspaces);
+    toggleExpanded: showMoreWorkspaces,
+  } = useLimitedSidebarGroup(project.workspaces, workspaceGroupOptions);
+  const compact = useIsCompactSidebar();
   const rowModel = useMemo(
     () =>
       buildSidebarProjectRowModel({
@@ -1768,14 +1802,16 @@ function ProjectBlock({
           />
           {canToggleWorkspaces ? (
             <SidebarGroupToggleRow
-              expanded={workspacesExpanded}
-              onPress={toggleWorkspacesExpanded}
+              expanded={false}
+              paged
+              onPress={showMoreWorkspaces}
               testID={`sidebar-project-show-more-${project.viewKey}`}
             />
           ) : null}
         </>
       );
-    } else if (rowModel.trailingAction.kind === "new_workspace") {
+    } else if (rowModel.trailingAction.kind === "new_workspace" && !compact) {
+      // Compact keeps an empty project to its header row; the header's own "+" still creates one.
       projectChildren = (
         <NewWorkspaceGhostRow
           project={project}
@@ -2246,7 +2282,7 @@ function ProjectModeList({
 
       setWorkspaceOrder(
         projectViewKey,
-        mergeWithRemainder({
+        mergeIntoVisibleSlots({
           currentOrder: currentWorkspaceOrder,
           reorderedVisibleKeys: reorderedWorkspaceKeys,
         }),
@@ -2583,6 +2619,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   projectRowPressed: {
     backgroundColor: theme.colors.surface2,
+  },
+  projectRowCompact: {
+    minHeight: 28,
+    paddingVertical: theme.spacing[1],
+    marginBottom: 0,
   },
   projectRowDragging: {
     backgroundColor: theme.colors.surface2,

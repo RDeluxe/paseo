@@ -1123,6 +1123,23 @@ export const fr: TranslationResources = {
     display: {
       trigger: "Préférences d'affichage",
       heading: "Affichage",
+      density: {
+        label: "Densité",
+        comfortable: "Confortable",
+        compact: "Compacte",
+      },
+      workspaceLimit: {
+        label: "Par projet",
+        option: "{{count}} workspaces",
+      },
+      hideInactive: {
+        label: "Masquer les inactifs",
+        never: "Jamais",
+        option: "Après {{count}} jours",
+        value: "{{count}} j",
+      },
+      collapseAll: "Tout replier",
+      expandAll: "Tout déplier",
       grouping: {
         label: "Regroupement",
         project: "Projet",
@@ -1250,6 +1267,7 @@ export const fr: TranslationResources = {
         newWorkspace: "Nouvel espace de travail",
         showMore: "Afficher plus",
         showLess: "Afficher moins",
+        more: "Plus",
         createWorkspaceFor: "Créer un nouvel espace de travail pour{{projectName}}",
         copyPath: "Copier le chemin",
         copyBranchName: "Copier le nom de la branche",

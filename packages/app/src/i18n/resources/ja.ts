@@ -1101,6 +1101,23 @@ export const ja: TranslationResources = {
     display: {
       trigger: "表示設定",
       heading: "表示",
+      density: {
+        label: "表示密度",
+        comfortable: "ゆったり",
+        compact: "コンパクト",
+      },
+      workspaceLimit: {
+        label: "プロジェクトごと",
+        option: "{{count}} 件のワークスペース",
+      },
+      hideInactive: {
+        label: "非アクティブを非表示",
+        never: "しない",
+        option: "{{count}} 日後",
+        value: "{{count}}日",
+      },
+      collapseAll: "すべて折りたたむ",
+      expandAll: "すべて展開",
       grouping: {
         label: "グループ化",
         project: "プロジェクト",
@@ -1228,6 +1245,7 @@ export const ja: TranslationResources = {
         newWorkspace: "新しいワークスペース",
         showMore: "さらに表示",
         showLess: "表示を減らす",
+        more: "さらに",
         createWorkspaceFor: "{{projectName}}の新しいワークスペースを作成",
         copyPath: "パスをコピー",
         copyBranchName: "ブランチ名をコピー",

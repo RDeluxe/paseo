@@ -1088,6 +1088,23 @@ export const ar: TranslationResources = {
     display: {
       trigger: "تفضيلات العرض",
       heading: "العرض",
+      density: {
+        label: "الكثافة",
+        comfortable: "مريحة",
+        compact: "مضغوطة",
+      },
+      workspaceLimit: {
+        label: "لكل مشروع",
+        option: "{{count}} مساحات عمل",
+      },
+      hideInactive: {
+        label: "إخفاء غير النشطة",
+        never: "أبدًا",
+        option: "بعد {{count}} يوم",
+        value: "{{count}} ي",
+      },
+      collapseAll: "طي الكل",
+      expandAll: "توسيع الكل",
       grouping: {
         label: "التجميع",
         project: "المشروع",
@@ -1214,6 +1231,7 @@ export const ar: TranslationResources = {
         newWorkspace: "مساحة عمل جديدة",
         showMore: "عرض المزيد",
         showLess: "عرض أقل",
+        more: "المزيد",
         createWorkspaceFor: "قم بإنشاء مساحة عمل جديدة لـ{{projectName}}",
         copyPath: "نسخ المسار",
         copyBranchName: "انسخ اسم الفرع",
