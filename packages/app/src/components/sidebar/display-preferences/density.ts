@@ -3,13 +3,14 @@ import type { ProjectIconSize } from "@/components/sidebar/project-leading-visua
 /**
  * How tall the sidebar's rows are.
  *
- * Compact is for a sidebar tracking hundreds of workspaces, where the comfortable rows fit a
- * dozen on screen. It makes every workspace one line: the padding goes, the line under the title
- * goes, a remote host becomes a bare glyph at the end of the title, project icons shrink a
- * step, and an empty project drops its placeholder row.
+ * For a sidebar tracking hundreds of workspaces, where the comfortable rows fit a dozen on
+ * screen. Semi-compact keeps everything a comfortable row says and takes the space out: tight
+ * padding, the host as a bare glyph at the end of the title, a terser line under it, and an empty
+ * project down to its header row. Compact goes further and makes every workspace one line: the
+ * line under the title goes and project icons shrink a step.
  */
 
-export const SIDEBAR_DENSITIES = ["comfortable", "compact"] as const;
+export const SIDEBAR_DENSITIES = ["comfortable", "semiCompact", "compact"] as const;
 
 export type SidebarDensity = (typeof SIDEBAR_DENSITIES)[number];
 
@@ -20,7 +21,7 @@ export interface SidebarDensityLayout {
   /** Rows drop their vertical padding and margins: 24px workspace rows, 28px project rows. */
   tightRows: boolean;
   /** The line under a workspace title. */
-  metaRow: "full" | "none";
+  metaRow: "full" | "condensed" | "none";
   /** A remote host leaves the line under the title for a bare glyph at the end of the title. */
   hostOnTitle: boolean;
   projectIconSize: ProjectIconSize;
@@ -35,6 +36,13 @@ export const SIDEBAR_DENSITY_LAYOUTS: Record<SidebarDensity, SidebarDensityLayou
     hostOnTitle: false,
     projectIconSize: "md",
     emptyProjectPlaceholder: true,
+  },
+  semiCompact: {
+    tightRows: true,
+    metaRow: "condensed",
+    hostOnTitle: true,
+    projectIconSize: "md",
+    emptyProjectPlaceholder: false,
   },
   compact: {
     tightRows: true,

@@ -211,16 +211,19 @@ export function useSidebarRowItems(): SidebarRowItems {
 export function useSidebarMetaPreferences(): {
   rowItems: SidebarRowItems;
   checksDisplay: SidebarChecksDisplay;
+  /** Semi-compact's terser line: no separators, and states said by their glyph alone. */
+  condensed: boolean;
 } {
   const {
-    settings: { sidebarRowItems, sidebarChecksDisplay },
+    settings: { sidebarRowItems, sidebarChecksDisplay, sidebarDensity },
   } = useAppSettings();
   return useMemo(
     () => ({
       rowItems: sidebarRowItems ?? DEFAULT_SIDEBAR_ROW_ITEMS,
       checksDisplay: sidebarChecksDisplay ?? DEFAULT_SIDEBAR_CHECKS_DISPLAY,
+      condensed: SIDEBAR_DENSITY_LAYOUTS[sidebarDensity].metaRow === "condensed",
     }),
-    [sidebarRowItems, sidebarChecksDisplay],
+    [sidebarRowItems, sidebarChecksDisplay, sidebarDensity],
   );
 }
 

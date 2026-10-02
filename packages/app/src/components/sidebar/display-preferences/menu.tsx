@@ -21,6 +21,7 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  Rows2,
   Rows3,
   Rows4,
   Server,
@@ -127,7 +128,8 @@ const TRAILING_ICONS: Record<SidebarTrailingChoice, OptionIcon> = {
 };
 
 const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
-  comfortable: withUnistyles(Rows3),
+  comfortable: withUnistyles(Rows2),
+  semiCompact: withUnistyles(Rows3),
   compact: withUnistyles(Rows4),
 };
 
@@ -167,6 +169,7 @@ const TRAILING_LABEL_KEYS: Record<SidebarTrailingChoice, string> = {
 
 const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
   comfortable: "sidebar.display.density.comfortable",
+  semiCompact: "sidebar.display.density.semiCompact",
   compact: "sidebar.display.density.compact",
 };
 
