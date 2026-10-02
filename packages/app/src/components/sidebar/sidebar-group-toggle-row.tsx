@@ -17,6 +17,15 @@ const foregroundColorMapping = (theme: Theme) => ({
 const ThemedChevronDown = withUnistyles(ChevronDown);
 const ThemedChevronUp = withUnistyles(ChevronUp);
 
+/** Show more and Show less fold a group open and shut; More pages it open and stays. */
+export type SidebarGroupToggleAction = "showMore" | "showLess" | "more";
+
+const TOGGLE_LABEL_KEYS: Record<SidebarGroupToggleAction, string> = {
+  showMore: "sidebar.workspace.actions.showMore",
+  showLess: "sidebar.workspace.actions.showLess",
+  more: "sidebar.workspace.actions.more",
+};
+
 /**
  * The row that ends a truncated group. It is a workspace row that happens to say "Show more", so
  * it takes the workspace row's geometry — height, padding, radius, and both fills — rather than a
@@ -26,22 +35,24 @@ const ThemedChevronUp = withUnistyles(ChevronUp);
  * `indented` because the two groupings disagree: status rows sit on their header's label rail and
  * project rows sit flush, so the caller says which list this row is ending. The indent itself is
  * the workspace row's, imported rather than re-derived.
+ *
+ * `more` is the project list's paging row: each press shows the next page and nothing folds back,
+ * so there is no chevron to point a direction. The status slot stays, empty, so "More" still
+ * lands on the titles' rail.
  */
 export function SidebarGroupToggleRow({
-  expanded,
+  action,
   onPress,
   indented = false,
   testID,
 }: {
-  expanded: boolean;
+  action: SidebarGroupToggleAction;
   onPress: () => void;
   indented?: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
-  const label = t(
-    expanded ? "sidebar.workspace.actions.showLess" : "sidebar.workspace.actions.showMore",
-  );
+  const label = t(TOGGLE_LABEL_KEYS[action]);
   const compact = useIsCompactSidebar();
   const rowStyle = useCallback(
     ({ hovered = false, pressed }: PressableStateCallbackType & { hovered?: boolean }) => [
@@ -65,16 +76,8 @@ export function SidebarGroupToggleRow({
       {({ hovered, pressed }) => (
         <>
           <View style={styles.iconSlot}>
-            {expanded ? (
-              <ThemedChevronUp
-                size={14}
-                uniProps={hovered || pressed ? foregroundColorMapping : foregroundMutedColorMapping}
-              />
-            ) : (
-              <ThemedChevronDown
-                size={14}
-                uniProps={hovered || pressed ? foregroundColorMapping : foregroundMutedColorMapping}
-              />
+            {action === "more" ? null : (
+              <ToggleChevron expanded={action === "showLess"} active={hovered || pressed} />
             )}
           </View>
           <Text style={hovered || pressed ? styles.textHovered : styles.text} numberOfLines={1}>
@@ -83,6 +86,15 @@ export function SidebarGroupToggleRow({
         </>
       )}
     </Pressable>
+  );
+}
+
+function ToggleChevron({ expanded, active }: { expanded: boolean; active: boolean }) {
+  const uniProps = active ? foregroundColorMapping : foregroundMutedColorMapping;
+  return expanded ? (
+    <ThemedChevronUp size={14} uniProps={uniProps} />
+  ) : (
+    <ThemedChevronDown size={14} uniProps={uniProps} />
   );
 }
 

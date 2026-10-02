@@ -1110,6 +1110,10 @@ export const ru: TranslationResources = {
         comfortable: "Свободная",
         compact: "Компактная",
       },
+      workspaceLimit: {
+        label: "На проект",
+        option: "Рабочих пространств: {{count}}",
+      },
       grouping: {
         label: "Группировка",
         project: "Проект",
@@ -1237,6 +1241,7 @@ export const ru: TranslationResources = {
         newWorkspace: "Новое рабочее пространство",
         showMore: "Показать ещё",
         showLess: "Показать меньше",
+        more: "Ещё",
         createWorkspaceFor: "Создать новое рабочее пространство для {{projectName}}",
         copyPath: "Копировать путь",
         copyBranchName: "Скопировать имя ветки",
