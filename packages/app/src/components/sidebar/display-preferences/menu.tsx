@@ -22,6 +22,7 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  Image,
   History,
   ListFilter,
   Rows2,
@@ -62,6 +63,7 @@ import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
+import { SIDEBAR_PROJECT_ICONS, type SidebarProjectIcon } from "./project-icon";
 import { SIDEBAR_HIDE_INACTIVE_DAYS, SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
@@ -130,6 +132,11 @@ const TRAILING_ICONS: Record<SidebarTrailingChoice, OptionIcon> = {
   timestamp: withUnistyles(Clock),
 };
 
+const PROJECT_ICON_ICONS: Record<SidebarProjectIcon, OptionIcon> = {
+  avatar: withUnistyles(Image),
+  folder: withUnistyles(Folder),
+};
+
 const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
   comfortable: withUnistyles(Rows2),
   semiCompact: withUnistyles(Rows3),
@@ -171,6 +178,11 @@ const CHECKS_DISPLAY_LABEL_KEYS: Record<SidebarChecksDisplay, string> = {
 const TRAILING_LABEL_KEYS: Record<SidebarTrailingChoice, string> = {
   diff: "sidebar.display.show.diff",
   timestamp: "sidebar.display.show.timestamp",
+};
+
+const PROJECT_ICON_LABEL_KEYS: Record<SidebarProjectIcon, string> = {
+  avatar: "sidebar.display.projectIcon.avatar",
+  folder: "sidebar.display.projectIcon.folder",
 };
 
 const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
@@ -254,6 +266,20 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
             selectedValue={preferences.titleSource}
             onSelect={preferences.setTitleSource}
             testIDPrefix="sidebar-workspace-title-source"
+          />
+        ),
+      },
+      {
+        id: "projectIcon",
+        title: t("sidebar.display.projectIcon.label"),
+        content: (
+          <OptionList
+            values={SIDEBAR_PROJECT_ICONS}
+            icons={PROJECT_ICON_ICONS}
+            labelKeys={PROJECT_ICON_LABEL_KEYS}
+            selectedValue={preferences.projectIcon}
+            onSelect={preferences.setProjectIcon}
+            testIDPrefix="sidebar-project-icon"
           />
         ),
       },
@@ -399,6 +425,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
             testID="sidebar-display-title-source"
           >
             {t("sidebar.display.titleSource.label")}
+          </MenuSubTrigger>
+          <MenuSubTrigger
+            id="projectIcon"
+            value={t(PROJECT_ICON_LABEL_KEYS[preferences.projectIcon])}
+            testID="sidebar-display-project-icon"
+          >
+            {t("sidebar.display.projectIcon.label")}
           </MenuSubTrigger>
           <MenuSubTrigger id="show" testID="sidebar-display-show">
             {t("sidebar.display.show.label")}

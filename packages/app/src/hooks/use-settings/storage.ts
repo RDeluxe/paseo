@@ -14,6 +14,11 @@ import {
   type SidebarDensity,
 } from "@/components/sidebar/display-preferences/density";
 import {
+  DEFAULT_SIDEBAR_PROJECT_ICON,
+  SIDEBAR_PROJECT_ICONS,
+  type SidebarProjectIcon,
+} from "@/components/sidebar/display-preferences/project-icon";
+import {
   DEFAULT_SIDEBAR_HIDE_INACTIVE_DAYS,
   DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
   SIDEBAR_HIDE_INACTIVE_DAYS,
@@ -97,6 +102,7 @@ export interface AppSettings {
   sidebarRowItems: SidebarRowItems;
   sidebarChecksDisplay: SidebarChecksDisplay;
   sidebarDensity: SidebarDensity;
+  sidebarProjectIcon: SidebarProjectIcon;
   /** Workspaces a project shows before "More". */
   sidebarWorkspaceLimit: SidebarWorkspaceLimit;
   /** Finished workspaces untouched for longer than this go behind "More". */
@@ -156,6 +162,7 @@ export const DEFAULT_CLIENT_SETTINGS: AppSettings = {
   sidebarRowItems: DEFAULT_SIDEBAR_ROW_ITEMS,
   sidebarChecksDisplay: DEFAULT_SIDEBAR_CHECKS_DISPLAY,
   sidebarDensity: DEFAULT_SIDEBAR_DENSITY,
+  sidebarProjectIcon: DEFAULT_SIDEBAR_PROJECT_ICON,
   sidebarWorkspaceLimit: DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
   sidebarHideInactiveDays: DEFAULT_SIDEBAR_HIDE_INACTIVE_DAYS,
   sidebarNavItems: [],
@@ -248,6 +255,7 @@ const StoredAppSettingsSchema = z
       .optional()
       .catch(DEFAULT_SIDEBAR_CHECKS_DISPLAY),
     sidebarDensity: z.enum(SIDEBAR_DENSITIES).catch(DEFAULT_SIDEBAR_DENSITY),
+    sidebarProjectIcon: z.enum(SIDEBAR_PROJECT_ICONS).catch(DEFAULT_SIDEBAR_PROJECT_ICON),
     sidebarWorkspaceLimit: z
       .literal(SIDEBAR_WORKSPACE_LIMITS)
       .catch(DEFAULT_SIDEBAR_WORKSPACE_LIMIT),

@@ -1112,6 +1112,11 @@ export const ar: TranslationResources = {
         status: "الحالة",
         labels: "التسميات",
       },
+      projectIcon: {
+        label: "أيقونة المشروع",
+        avatar: "الصورة الرمزية",
+        folder: "مجلد",
+      },
       titleSource: {
         label: "العنوان",
         title: "العنوان",

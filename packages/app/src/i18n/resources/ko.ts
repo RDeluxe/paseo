@@ -1119,6 +1119,11 @@ export const ko: TranslationResources = {
         status: "상태",
         labels: "레이블",
       },
+      projectIcon: {
+        label: "프로젝트 아이콘",
+        avatar: "아바타",
+        folder: "폴더",
+      },
       titleSource: {
         label: "제목",
         title: "제목",

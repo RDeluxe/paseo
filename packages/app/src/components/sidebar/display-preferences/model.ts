@@ -11,6 +11,7 @@ import {
 } from "@/stores/sidebar-view-store";
 import { DEFAULT_SIDEBAR_CHECKS_DISPLAY, type SidebarChecksDisplay } from "./checks-display";
 import { hasCompactRows, type SidebarDensity } from "./density";
+import type { SidebarProjectIcon } from "./project-icon";
 import type { SidebarHideInactiveDays, SidebarWorkspaceLimit } from "./project-limit";
 import { DEFAULT_SIDEBAR_ROW_ITEMS, type SidebarRowItem, type SidebarRowItems } from "./row-items";
 
@@ -28,6 +29,8 @@ export interface SidebarDisplayPreferences {
   setChecksDisplay: (display: SidebarChecksDisplay) => void;
   density: SidebarDensity;
   setDensity: (density: SidebarDensity) => void;
+  projectIcon: SidebarProjectIcon;
+  setProjectIcon: (icon: SidebarProjectIcon) => void;
   workspaceLimit: SidebarWorkspaceLimit;
   setWorkspaceLimit: (limit: SidebarWorkspaceLimit) => void;
   hideInactiveDays: SidebarHideInactiveDays;
@@ -75,6 +78,7 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       sidebarRowItems,
       sidebarChecksDisplay,
       sidebarDensity,
+      sidebarProjectIcon,
       sidebarWorkspaceLimit,
       sidebarHideInactiveDays,
     },
@@ -107,6 +111,13 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
   const setDensity = useCallback(
     (density: SidebarDensity) => {
       void updateSettings({ sidebarDensity: density });
+    },
+    [updateSettings],
+  );
+
+  const setProjectIcon = useCallback(
+    (icon: SidebarProjectIcon) => {
+      void updateSettings({ sidebarProjectIcon: icon });
     },
     [updateSettings],
   );
@@ -146,6 +157,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setChecksDisplay,
       density: sidebarDensity,
       setDensity,
+      projectIcon: sidebarProjectIcon,
+      setProjectIcon,
       workspaceLimit: sidebarWorkspaceLimit,
       setWorkspaceLimit,
       hideInactiveDays: sidebarHideInactiveDays,
@@ -173,6 +186,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setChecksDisplay,
       sidebarDensity,
       setDensity,
+      sidebarProjectIcon,
+      setProjectIcon,
       sidebarWorkspaceLimit,
       setWorkspaceLimit,
       sidebarHideInactiveDays,
@@ -254,4 +269,12 @@ export function useSidebarProjectLimit(): SidebarProjectLimit {
     () => ({ workspaceLimit: sidebarWorkspaceLimit, hideInactiveDays: sidebarHideInactiveDays }),
     [sidebarWorkspaceLimit, sidebarHideInactiveDays],
   );
+}
+
+/** What leads each project row, for the project headers. */
+export function useSidebarProjectIcon(): SidebarProjectIcon {
+  const {
+    settings: { sidebarProjectIcon },
+  } = useAppSettings();
+  return sidebarProjectIcon;
 }
