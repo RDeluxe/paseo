@@ -33,6 +33,9 @@ import {
 } from "@/components/sidebar/sidebar-workspace-row-content";
 import { useOpenKebabMenuVisibility } from "@/components/sidebar/use-open-kebab-menu-visibility";
 import { getSidebarRowBackdrop } from "@/components/sidebar/sidebar-row-backdrop";
+// FORK(RDeluxe/paseo): compact density. See FORK.md.
+import { compactSidebarStyles, isCompactDensity } from "@/fork/sidebar-density";
+import { useSidebarDensity } from "@/fork/sidebar-preferences";
 import { selectWorkspaceServiceSummary } from "@/components/sidebar/workspace-meta-row";
 import {
   SidebarWorkspaceTrailingContent,
@@ -268,6 +271,7 @@ function WorkspaceRowBody({
   }, [draggable, interaction]);
 
   const accessibilityState = useMemo(() => ({ selected }), [selected]);
+  const compact = isCompactDensity(useSidebarDensity());
 
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
@@ -279,6 +283,7 @@ function WorkspaceRowBody({
           isPressed,
           selected,
           isHovered,
+          compact,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -463,14 +468,18 @@ function getWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  compact = false,
 }: {
   isDragging: boolean;
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  // FORK(RDeluxe/paseo): compact density. See FORK.md.
+  compact?: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && compactSidebarStyles.workspaceRow,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
     isDragging && styles.workspaceRowDragging,

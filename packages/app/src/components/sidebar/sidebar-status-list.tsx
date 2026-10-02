@@ -76,6 +76,9 @@ import {
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+// FORK(RDeluxe/paseo): compact density. See FORK.md.
+import { compactSidebarStyles, isCompactDensity } from "@/fork/sidebar-density";
+import { useSidebarDensity } from "@/fork/sidebar-preferences";
 import type { ToggleSidebarWorkspacePin } from "@/hooks/use-sidebar-workspace-pin";
 import { DraggableList, type DraggableRenderItemInfo } from "@/components/draggable-list";
 import type { DraggableListDragHandleProps } from "@/components/draggable-list.types";
@@ -823,6 +826,7 @@ function StatusWorkspaceRowInnerContent({
     setIsPressed(false);
     endDragPress?.();
   }, [endDragPress]);
+  const compact = isCompactDensity(useSidebarDensity());
 
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
@@ -848,6 +852,7 @@ function StatusWorkspaceRowInnerContent({
           isHovered,
           inStatusGroup,
           isDragging,
+          compact,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -1018,15 +1023,19 @@ function getStatusWorkspaceRowStyle({
   isHovered,
   inStatusGroup,
   isDragging,
+  compact = false,
 }: {
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
   inStatusGroup: boolean;
   isDragging: boolean;
+  // FORK(RDeluxe/paseo): compact density. See FORK.md.
+  compact?: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && compactSidebarStyles.workspaceRow,
     inStatusGroup && sidebarWorkspaceRowStyles.rowIndented,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,

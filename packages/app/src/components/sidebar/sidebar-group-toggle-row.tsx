@@ -6,6 +6,9 @@ import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { isWeb } from "@/constants/platform";
 import { sidebarWorkspaceRowStyles } from "@/components/sidebar/sidebar-workspace-row-content";
 import type { Theme } from "@/styles/theme";
+// FORK(RDeluxe/paseo): compact density. See FORK.md.
+import { compactSidebarStyles, isCompactDensity } from "@/fork/sidebar-density";
+import { useSidebarDensity } from "@/fork/sidebar-preferences";
 
 const foregroundMutedColorMapping = (theme: Theme) => ({
   color: theme.colors.foregroundMuted,
@@ -41,14 +44,17 @@ export function SidebarGroupToggleRow({
   const label = t(
     expanded ? "sidebar.workspace.actions.showLess" : "sidebar.workspace.actions.showMore",
   );
+  // FORK(RDeluxe/paseo): compact density. See FORK.md.
+  const compact = isCompactDensity(useSidebarDensity());
   const rowStyle = useCallback(
     ({ hovered = false, pressed }: PressableStateCallbackType & { hovered?: boolean }) => [
       styles.row,
+      compact && compactSidebarStyles.toggleRow,
       indented && sidebarWorkspaceRowStyles.rowIndented,
       hovered && !pressed && styles.rowHovered,
       pressed && styles.rowPressed,
     ],
-    [indented],
+    [compact, indented],
   );
 
   return (
