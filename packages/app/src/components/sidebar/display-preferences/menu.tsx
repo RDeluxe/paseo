@@ -21,6 +21,8 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  Rows3,
+  Rows4,
   Server,
   Settings2,
   Tag,
@@ -53,6 +55,7 @@ import {
 import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/workspace-labels";
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
+import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -120,6 +123,11 @@ const TRAILING_ICONS: Record<SidebarTrailingChoice, OptionIcon> = {
   timestamp: withUnistyles(Clock),
 };
 
+const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
+  comfortable: withUnistyles(Rows3),
+  compact: withUnistyles(Rows4),
+};
+
 const GROUPING_MODES: readonly SidebarGroupMode[] = ["project", "status"];
 const TITLE_SOURCES: readonly WorkspaceTitleSource[] = ["title", "branch"];
 const TRAILING_CHOICES: readonly SidebarTrailingChoice[] = ["diff", "timestamp"];
@@ -152,6 +160,11 @@ const CHECKS_DISPLAY_LABEL_KEYS: Record<SidebarChecksDisplay, string> = {
 const TRAILING_LABEL_KEYS: Record<SidebarTrailingChoice, string> = {
   diff: "sidebar.display.show.diff",
   timestamp: "sidebar.display.show.timestamp",
+};
+
+const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
+  comfortable: "sidebar.display.density.comfortable",
+  compact: "sidebar.display.density.compact",
 };
 
 /**
@@ -223,6 +236,20 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
         id: "show",
         title: t("sidebar.display.show.label"),
         content: <ShowPage preferences={preferences} />,
+      },
+      {
+        id: "density",
+        title: t("sidebar.display.density.label"),
+        content: (
+          <OptionList
+            values={SIDEBAR_DENSITIES}
+            icons={DENSITY_ICONS}
+            labelKeys={DENSITY_LABEL_KEYS}
+            selectedValue={preferences.density}
+            onSelect={preferences.setDensity}
+            testIDPrefix="sidebar-density"
+          />
+        ),
       },
       {
         id: "checks",
@@ -317,6 +344,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
           </MenuSubTrigger>
           <MenuSubTrigger id="show" testID="sidebar-display-show">
             {t("sidebar.display.show.label")}
+          </MenuSubTrigger>
+          <MenuSubTrigger
+            id="density"
+            value={t(DENSITY_LABEL_KEYS[preferences.density])}
+            testID="sidebar-display-density"
+          >
+            {t("sidebar.display.density.label")}
           </MenuSubTrigger>
           {showHostFilter ? (
             <>

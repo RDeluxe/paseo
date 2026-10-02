@@ -1156,6 +1156,11 @@ export const ko: TranslationResources = {
     display: {
       trigger: "표시 설정",
       heading: "표시",
+      density: {
+        label: "밀도",
+        comfortable: "여유 있게",
+        compact: "촘촘하게",
+      },
       grouping: {
         label: "그룹화",
         project: "프로젝트",

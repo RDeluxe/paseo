@@ -1157,6 +1157,11 @@ export const en = {
     display: {
       trigger: "Display preferences",
       heading: "Display",
+      density: {
+        label: "Density",
+        comfortable: "Comfortable",
+        compact: "Compact",
+      },
       grouping: {
         label: "Grouping",
         project: "Project",

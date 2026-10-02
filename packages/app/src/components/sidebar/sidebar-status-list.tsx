@@ -76,6 +76,7 @@ import {
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+import { useSidebarDensityLayout } from "@/components/sidebar/display-preferences/model";
 import type { ToggleSidebarWorkspacePin } from "@/hooks/use-sidebar-workspace-pin";
 import { DraggableList, type DraggableRenderItemInfo } from "@/components/draggable-list";
 import type { DraggableListDragHandleProps } from "@/components/draggable-list.types";
@@ -825,6 +826,7 @@ function StatusWorkspaceRowInnerContent({
     endDragPress?.();
   }, [endDragPress]);
 
+  const { tightRows } = useSidebarDensityLayout();
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
       {({ isHovered, contextMenuOpen, onContextMenuOpenChange, hoverHandlers }) => {
@@ -847,6 +849,7 @@ function StatusWorkspaceRowInnerContent({
           isPressed,
           selected,
           isHovered,
+          tightRows,
           inStatusGroup,
           isDragging,
         });
@@ -1017,17 +1020,20 @@ function getStatusWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  tightRows,
   inStatusGroup,
   isDragging,
 }: {
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  tightRows: boolean;
   inStatusGroup: boolean;
   isDragging: boolean;
 }) {
   return [
     styles.workspaceRow,
+    tightRows && sidebarWorkspaceRowStyles.rowCompact,
     inStatusGroup && sidebarWorkspaceRowStyles.rowIndented,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
