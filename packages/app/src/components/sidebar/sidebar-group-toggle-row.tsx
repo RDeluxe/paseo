@@ -7,6 +7,7 @@ import { isWeb } from "@/constants/platform";
 import { sidebarWorkspaceRowStyles } from "@/components/sidebar/sidebar-workspace-row-content";
 import { DensityIcon } from "@/components/ui/density-icon";
 import { density, densityIconBox } from "@/styles/density";
+import { useSidebarDensityLayout } from "@/components/sidebar/display-preferences/model";
 
 /**
  * The row that ends a truncated group. It is a workspace row that happens to say "Show more", so
@@ -33,14 +34,16 @@ export function SidebarGroupToggleRow({
   const label = t(
     expanded ? "sidebar.workspace.actions.showLess" : "sidebar.workspace.actions.showMore",
   );
+  const { tightRows } = useSidebarDensityLayout();
   const rowStyle = useCallback(
     ({ hovered = false, pressed }: PressableStateCallbackType & { hovered?: boolean }) => [
       styles.row,
+      tightRows && sidebarWorkspaceRowStyles.rowCompact,
       indented && sidebarWorkspaceRowStyles.rowIndented,
       hovered && !pressed && styles.rowHovered,
       pressed && styles.rowPressed,
     ],
-    [indented],
+    [tightRows, indented],
   );
 
   return (

@@ -1181,6 +1181,11 @@ export const en = {
         lastPrompt: "Last prompt",
         updateHost: "Update hosts to sort workspaces",
       },
+      density: {
+        label: "Density",
+        comfortable: "Comfortable",
+        compact: "Compact",
+      },
       grouping: {
         label: "Grouping",
         project: "Project",
