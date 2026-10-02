@@ -58,6 +58,8 @@ import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
 import { WorkspaceLabelDot } from "@/workspace-labels/swatch";
 import { WorkspaceLabelManagerModal } from "@/workspace-labels/manager-modal";
+// FORK(RDeluxe/paseo): density, per-project limit, stale hiding, collapse all. See FORK.md.
+import { ForkSidebarMenuEntries, useForkSidebarMenuPages } from "@/fork/sidebar-menu";
 
 const mutedIconMapping = (theme: Theme) => ({ color: theme.colors.foregroundMuted });
 
@@ -188,6 +190,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   // catalog only counts hosts that are online, so a host dropping off would otherwise take away
   // the only way back to a filter that is still hiding workspaces.
   const showLabelFilter = labels.length > 0 || hasActiveSidebarLabelFilter(preferences.labelFilter);
+  const forkPages = useForkSidebarMenuPages();
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -269,8 +272,10 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
         ),
       });
     }
+    definitions.push(...forkPages);
     return definitions;
   }, [
+    forkPages,
     t,
     preferences,
     hosts,
@@ -359,6 +364,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
               </MenuSubTrigger>
             </>
           ) : null}
+          <ForkSidebarMenuEntries />
         </MenuSurface>
       </MenuRoot>
       <WorkspaceLabelManagerModal visible={managerOpen} onClose={closeManager} />

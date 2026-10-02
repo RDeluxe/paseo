@@ -99,6 +99,10 @@ import { useLongPressDragInteraction } from "@/components/sidebar/use-long-press
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+// FORK(RDeluxe/paseo): per-project limit, stale hiding and compact rows. See FORK.md.
+import { useForkProjectGroupOptions } from "@/fork/project-group";
+import { compactSidebarStyles, isCompactDensity } from "@/fork/sidebar-density";
+import { useSidebarDensity } from "@/fork/sidebar-preferences";
 import {
   SidebarWorkspaceRowFrame,
   SidebarWorkspaceRowContent,
@@ -364,14 +368,18 @@ function getProjectWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  compact = false,
 }: {
   isDragging: boolean;
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  // FORK(RDeluxe/paseo): compact density. See FORK.md.
+  compact?: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && compactSidebarStyles.workspaceRow,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
     isDragging && styles.workspaceRowDragging,
@@ -929,15 +937,17 @@ function ProjectHeaderRow({
     interaction.handlePressOut();
   }, [interaction]);
 
+  const compact = isCompactDensity(useSidebarDensity());
   const projectRowStyle = useCallback(
     ({ pressed }: PressableStateCallbackType) => [
       styles.projectRow,
+      compact && compactSidebarStyles.projectRow,
       isDragging && styles.projectRowDragging,
       selected && styles.sidebarRowSelected,
       isHovered && styles.projectRowHovered,
       pressed && styles.projectRowPressed,
     ],
-    [isDragging, selected, isHovered],
+    [compact, isDragging, selected, isHovered],
   );
 
   const rowChildren = (
@@ -1110,6 +1120,7 @@ function WorkspaceRowInner({
   }, [interaction]);
 
   const accessibilityState = useMemo(() => ({ selected }), [selected]);
+  const compact = isCompactDensity(useSidebarDensity());
 
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
@@ -1121,6 +1132,7 @@ function WorkspaceRowInner({
           isPressed,
           selected,
           isHovered,
+          compact,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -1596,7 +1608,10 @@ function ProjectBlock({
     expanded: workspacesExpanded,
     canToggle: canToggleWorkspaces,
     toggleExpanded: toggleWorkspacesExpanded,
-  } = useLimitedSidebarGroup(project.workspaces);
+  } = useLimitedSidebarGroup(
+    project.workspaces,
+    useForkProjectGroupOptions(workspaceEntriesByKey, activeWorkspaceSelection),
+  );
   const rowModel = useMemo(
     () =>
       buildSidebarProjectRowModel({
@@ -1746,6 +1761,7 @@ function ProjectBlock({
   const handleToggleCollapsed = useCallback(() => {
     onToggleCollapsed(project.viewKey);
   }, [onToggleCollapsed, project.viewKey]);
+  const compactProject = isCompactDensity(useSidebarDensity());
 
   let projectChildren = null;
   if (!collapsed) {
@@ -1775,7 +1791,9 @@ function ProjectBlock({
           ) : null}
         </>
       );
-    } else if (rowModel.trailingAction.kind === "new_workspace") {
+    } else if (rowModel.trailingAction.kind === "new_workspace" && !compactProject) {
+      // FORK(RDeluxe/paseo): compact keeps an empty project to its one header row; the header's
+      // own "+" still creates a workspace. See FORK.md.
       projectChildren = (
         <NewWorkspaceGhostRow
           project={project}
