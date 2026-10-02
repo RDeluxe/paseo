@@ -868,7 +868,7 @@ describe("appearance settings", () => {
   it("restores the stored sidebar density and falls back to comfortable", async () => {
     const stored = makeDeps({
       storage: createInMemoryKeyValueStorage({
-        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarDensity: "compact" }),
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarDensity: "semiCompact" }),
       }),
     });
     const unknown = makeDeps({
@@ -877,7 +877,7 @@ describe("appearance settings", () => {
       }),
     });
 
-    expect((await loadAppSettingsFromStorage(stored)).sidebarDensity).toBe("compact");
+    expect((await loadAppSettingsFromStorage(stored)).sidebarDensity).toBe("semiCompact");
     expect((await loadAppSettingsFromStorage(unknown)).sidebarDensity).toBe("comfortable");
   });
 
