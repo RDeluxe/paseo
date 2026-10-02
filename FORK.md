@@ -77,6 +77,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/reorder-keeps-hidden`.
 - **Règle d'abandon :** disparaît avec la limite par projet.
 
+### Tout replier / tout déplier
+
+- **Objectif :** ranger d'un geste une barre latérale de vingt projets, comme dans Cursor.
+- **Comportement :** replie, ou déplie, les projets, les groupes de statut et la section épinglée. Deux actions en fin de menu, sans icônes.
+- **Où :** `collapseAllSections` et `expandAllSections` dans `stores/sidebar-collapsed-sections-store/state.ts` ; deux lignes en fin de `display-preferences/menu.tsx`.
+- **Preuve :** `e2e/browser/sidebar-collapse-all.spec.ts`, `stores/sidebar-collapsed-sections-store/state.test.ts`.
+- **Commit d'origine :** `feature/collapse-all`.
+- **Règle d'abandon :** si upstream ajoute un « collapse all », prendre le leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
