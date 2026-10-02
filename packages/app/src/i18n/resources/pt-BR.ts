@@ -1223,6 +1223,11 @@ export const ptBR: TranslationResources = {
         status: "Status",
         labels: "Etiquetas",
       },
+      projectIcon: {
+        label: "Ícone do projeto",
+        avatar: "Avatar",
+        folder: "Pasta",
+      },
       titleSource: {
         label: "Título",
         title: "Título",

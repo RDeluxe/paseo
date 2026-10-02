@@ -1,9 +1,10 @@
 import { ActivityIndicator, View, type ViewStyle } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, ChevronRight, CircleAlert } from "lucide-react-native";
+import { ChevronDown, ChevronRight, CircleAlert, Folder, FolderOpen } from "lucide-react-native";
 import { ProjectIconView } from "@/components/project-icon-view";
 import { getStatusBucketLabel } from "@/hooks/sidebar-status-view-model";
+import { DensityIcon } from "@/components/ui/density-icon";
 import { densityIconBox, densityIconProps } from "@/styles/density";
 import type { Theme } from "@/styles/theme";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
@@ -21,6 +22,7 @@ import {
 import { StatusRing } from "@/components/status-ring";
 import { getStatusRingOffset } from "@/components/status-ring/geometry";
 import type { SidebarSurfaceBackdrop } from "@/styles/surface-backdrop";
+import type { SidebarProjectIcon } from "@/components/sidebar/display-preferences/project-icon";
 
 /** Compact rows draw the project icon a step smaller; it keeps the same slot and rail. */
 export type ProjectIconSize = "md" | "xs";
@@ -49,6 +51,22 @@ const projectIconPropsXs = densityIconProps("xs", () => ({}));
 const ThemedActivityIndicator = withUnistyles(ActivityIndicator);
 const ThemedCircleAlert = withUnistyles(CircleAlert);
 
+/** A project's own icon, or a folder that is open while the project is expanded. */
+export type ProjectMark = { kind: "avatar" } | { kind: "folder"; open: boolean };
+
+const AVATAR_MARK: ProjectMark = { kind: "avatar" };
+const OPEN_FOLDER_MARK: ProjectMark = { kind: "folder", open: true };
+const CLOSED_FOLDER_MARK: ProjectMark = { kind: "folder", open: false };
+
+/** `chevron` is the action the row would take: "collapse" means the project is open. */
+function projectRowMark(
+  iconStyle: SidebarProjectIcon,
+  chevron: "expand" | "collapse" | null,
+): ProjectMark {
+  if (iconStyle === "avatar") return AVATAR_MARK;
+  return chevron === "collapse" ? OPEN_FOLDER_MARK : CLOSED_FOLDER_MARK;
+}
+
 const foregroundMutedColorMapping = (theme: Theme) => ({
   color: theme.colors.foregroundMuted,
 });
@@ -68,6 +86,7 @@ export function ProjectLeadingVisual({
   projectViewKey,
   backdrop,
   iconSize,
+  iconStyle,
   chevron = null,
   showChevron = false,
   isArchiving = false,
@@ -75,6 +94,7 @@ export function ProjectLeadingVisual({
   displayName: string;
   iconDataUri: string | null;
   iconSize: ProjectIconSize;
+  iconStyle: SidebarProjectIcon;
   /** Aggregate status of the project's workspaces; null when it shouldn't be surfaced. */
   statusBucket: SidebarStateBucket | null;
   projectViewKey: string;
@@ -84,7 +104,9 @@ export function ProjectLeadingVisual({
   showChevron?: boolean;
   isArchiving?: boolean;
 }) {
-  if (showChevron && chevron !== null) {
+  // A folder already says whether the project is open, so it does not trade places with the
+  // chevron on hover the way the avatar does.
+  if (showChevron && chevron !== null && iconStyle === "avatar") {
     return (
       <View style={styles.projectLeadingVisualSlot}>
         <ProjectInlineChevron chevron={chevron} />
@@ -108,6 +130,7 @@ export function ProjectLeadingVisual({
       statusBucket={statusBucket}
       backdrop={backdrop}
       iconSize={iconSize}
+      mark={projectRowMark(iconStyle, chevron)}
     />
   );
 }
@@ -124,6 +147,7 @@ export function ProjectStatusIndicator({
   statusBucket,
   backdrop,
   iconSize,
+  mark,
   loading = false,
   testID,
 }: {
@@ -134,6 +158,7 @@ export function ProjectStatusIndicator({
   /** The row's current background, so the status badge can knock out of it. */
   backdrop: SidebarSurfaceBackdrop;
   iconSize: ProjectIconSize;
+  mark: ProjectMark;
   loading?: boolean;
   testID?: string;
 }) {
@@ -157,12 +182,16 @@ export function ProjectStatusIndicator({
       }
     >
       <View style={iconSize === "xs" ? styles.projectIconBoxXs : styles.projectIconBox}>
-        <ProjectIcon
-          iconDataUri={iconDataUri}
-          placeholderInitial={placeholderInitial}
-          projectViewKey={projectViewKey}
-          size={iconSize}
-        />
+        {mark.kind === "folder" ? (
+          <ProjectFolder open={mark.open} size={iconSize} />
+        ) : (
+          <ProjectIcon
+            iconDataUri={iconDataUri}
+            placeholderInitial={placeholderInitial}
+            projectViewKey={projectViewKey}
+            size={iconSize}
+          />
+        )}
         {badgeContent === null || badgeBucket === null ? null : (
           <ProjectStatusBadge
             content={badgeContent}
@@ -252,6 +281,14 @@ function ProjectIcon({
       textStyle={size === "xs" ? styles.projectIconFallbackTextXs : styles.projectIconFallbackText}
       uniProps={size === "xs" ? projectIconPropsXs : projectIconProps}
     />
+  );
+}
+
+function ProjectFolder({ open, size }: { open: boolean; size: ProjectIconSize }) {
+  return (
+    <View testID={open ? "project-folder-open" : "project-folder-closed"}>
+      <DensityIcon icon={open ? FolderOpen : Folder} size={size} color="foregroundMuted" />
+    </View>
   );
 }
 

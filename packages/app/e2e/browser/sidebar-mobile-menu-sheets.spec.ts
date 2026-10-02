@@ -27,6 +27,7 @@ test("project and workspace kebabs open action sheets on compact layouts", async
       /^Grouping/,
       /^Sort/,
       /^Title/,
+      /^Project icon/,
       "Show",
       /^Density/,
       /^Per project/,
