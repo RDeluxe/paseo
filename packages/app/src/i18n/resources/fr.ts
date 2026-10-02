@@ -1217,6 +1217,8 @@ export const fr: TranslationResources = {
         option: "Après {{count}} jours",
         value: "{{count}} j",
       },
+      collapseAll: "Tout replier",
+      expandAll: "Tout déplier",
       grouping: {
         label: "Regroupement",
         project: "Projet",
