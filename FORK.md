@@ -59,6 +59,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/hide-inactive-workspaces`.
 - **Règle d'abandon :** si upstream masque automatiquement les inactifs, prendre le leur. En cas d'équivalence partielle (par exemple de l'archivage automatique), **ne rien retirer** et me demander.
 
+### Raccourcis clavier alignés sur la limite par projet
+
+- **Objectif :** que Cmd+1…9 ouvre toujours une ligne visible. Upstream numérote tous les workspaces d'un projet ; avec la limite et le masquage, Cmd+6 pouvait ouvrir un workspace caché derrière « More », et le projet suivant n'avait plus de numéros.
+- **Comportement :** seules les lignes qu'un projet affiche avant « More » sont numérotées. Le workspace sélectionné, quand il est affiché au-delà de la limite, garde sa place mais pas de numéro.
+- **Où :** `buildSidebarProjection` dans `sidebar/sidebar-projection.ts` (via `projectWorkspaceGroupOptions`) ; `sidebar/sidebar-model.tsx` lui passe la limite.
+- **Preuve :** `sidebar/sidebar-projection.test.ts` ; `workspace-shortcut-targets-subscriber.test.tsx` monte maintenant un `QueryClientProvider`, puisque le modèle lit les réglages.
+- **Commit d'origine :** `feature/shortcuts-follow-limit`.
+- **Règle d'abandon :** disparaît avec la limite par projet.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
