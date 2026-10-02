@@ -20,7 +20,10 @@ import {
 } from "@/utils/sidebar-shortcuts";
 import { statusWorkspaceGroups, type SidebarWorkspaceGroup } from "./sidebar-labels";
 import { projectWorkspaceGroupOptions, splitLimitedGroup } from "./limited-sidebar-group";
-import type { SidebarWorkspaceLimit } from "./display-preferences/project-limit";
+import type {
+  SidebarHideInactiveDays,
+  SidebarWorkspaceLimit,
+} from "./display-preferences/project-limit";
 
 export interface SidebarProjection {
   pinnedGroups: PinnedSidebarGroups;
@@ -48,6 +51,9 @@ export interface SidebarProjectionInput {
   collapsedProjectKeys: ReadonlySet<string>;
   collapsedWorkspaceGroupKeys: ReadonlySet<string>;
   workspaceLimit: SidebarWorkspaceLimit;
+  hideInactiveDays: SidebarHideInactiveDays;
+  /** The shared stale clock (`useStaleClock`), so these numbers match the rows on screen. */
+  now: number;
 }
 
 export function buildSidebarProjection(input: SidebarProjectionInput): SidebarProjection {
@@ -74,7 +80,10 @@ export function buildSidebarProjection(input: SidebarProjectionInput): SidebarPr
     // cannot see and the next project's rows still get theirs.
     const groupOptions = projectWorkspaceGroupOptions({
       limit: input.workspaceLimit,
+      hideInactiveDays: input.hideInactiveDays,
+      entriesByKey: input.workspaceEntriesByKey,
       selection: null,
+      now: input.now,
     });
     sections.push(
       ...pinnedGroups.unpinnedProjects.map((project) => ({

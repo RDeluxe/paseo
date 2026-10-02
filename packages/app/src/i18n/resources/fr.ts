@@ -1132,6 +1132,12 @@ export const fr: TranslationResources = {
         label: "Par projet",
         option: "{{count}} espaces de travail",
       },
+      hideInactive: {
+        label: "Masquer les inactifs",
+        never: "Jamais",
+        option: "Après {{count}} jours",
+        value: "{{count}} j",
+      },
       grouping: {
         label: "Regroupement",
         project: "Projet",

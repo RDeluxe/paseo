@@ -8,9 +8,9 @@ export function mergeWithRemainder(input: {
 }
 
 /**
- * For a list whose visible rows are not its first ones — a project keeps the selected workspace on
- * screen from past its limit. The reordered rows go back into the slots the visible rows held, so
- * the rows you could not see keep their place.
+ * For a list whose visible rows are not its first ones — a project hides stale workspaces in the
+ * middle and keeps the selected one on screen from further down. The reordered rows go back into
+ * the slots the visible rows held, so the rows you could not see keep their place.
  */
 export function mergeIntoVisibleSlots(input: {
   currentOrder: string[];
