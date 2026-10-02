@@ -1,0 +1,114 @@
+# FORK(RDeluxe/paseo): the fork's only active workflow. See FORK.md.
+#
+# Builds the macOS arm64 desktop app (unsigned, ad-hoc) and publishes it as a
+# GitHub release `fork-v<upstream>-<run>`. Skips when main has not moved since
+# the last fork release, so the cron costs nothing on quiet days.
+name: Fork desktop (macOS arm64)
+
+on:
+  schedule:
+    # Every 3 days at 04:00 UTC. Rebases happen on the server; this only ships them.
+    - cron: "0 4 */3 * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Build even if main has not changed since the last fork release"
+        type: boolean
+        default: false
+
+concurrency:
+  group: fork-desktop-macos
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.decide.outputs.should_build }}
+      release_tag: ${{ steps.decide.outputs.release_tag }}
+      upstream_tag: ${{ steps.decide.outputs.upstream_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force https://github.com/getpaseo/paseo.git 'refs/tags/v*:refs/tags/v*' >/dev/null 2>&1 || true
+          # The stable upstream tag main is based on: the newest vX.Y.Z reachable from main.
+          upstream_tag="$(git tag --merged HEAD --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)"
+          head_sha="$(git rev-parse HEAD)"
+          last_release_sha="$(gh release list --limit 20 --json tagName --jq '.[].tagName' | grep '^fork-' | head -1 | xargs -r -I{} git rev-list -n1 {} 2>/dev/null || true)"
+          should_build=true
+          if [ "$FORCE" != "true" ] && [ "$last_release_sha" = "$head_sha" ]; then
+            should_build=false
+          fi
+          echo "upstream_tag=$upstream_tag" >> "$GITHUB_OUTPUT"
+          echo "release_tag=fork-${upstream_tag}-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          echo "should_build=$should_build" >> "$GITHUB_OUTPUT"
+          echo "upstream=$upstream_tag head=$head_sha last_release=$last_release_sha build=$should_build"
+
+  build-macos:
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install JS dependencies
+        run: node scripts/npm-retry.mjs ci
+
+      # Ad-hoc signing has no Team ID, and the hardened runtime's library validation then refuses
+      # to load Electron's own frameworks. Hardened runtime only matters with a real certificate.
+      - name: Build desktop app (unsigned, ad-hoc)
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          PASEO_DESKTOP_SMOKE: "1"
+          PASEO_DESKTOP_SMOKE_ARTIFACT_DIR: ${{ runner.temp }}/desktop-smoke
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -euo pipefail
+          npm run build:desktop -- --publish never --mac --arm64 \
+            -c.mac.identity=- -c.mac.notarize=false -c.mac.hardenedRuntime=false
+
+      - name: Upload smoke diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-smoke-macos-arm64
+          path: ${{ runner.temp }}/desktop-smoke
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.check.outputs.release_tag }}
+          UPSTREAM_TAG: ${{ needs.check.outputs.upstream_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd packages/desktop/release
+          gh release create "$RELEASE_TAG" --target "$(git rev-parse HEAD)" \
+            --title "Paseo fork ${RELEASE_TAG#fork-}" \
+            --notes "Fork RDeluxe/paseo on upstream ${UPSTREAM_TAG}. Unsigned arm64 build — see FORK.md for install." \
+            ./*.dmg ./*.zip

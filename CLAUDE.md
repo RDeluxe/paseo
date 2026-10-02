@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **Fork RDeluxe/paseo.** This repository is a fork of `getpaseo/paseo`, maintained by an agent. Before any rebase, fix or feature, read [`FORK.md`](FORK.md) end to end: it lists what the fork changes, where its hook points are (`// FORK(RDeluxe/paseo)`), and the rules for rebasing onto upstream. Never push to `upstream`.
+
 Paseo is a mobile app for monitoring and controlling your local AI coding agents from anywhere. Your dev environment, in your pocket. Connects directly to your actual development environment — your code stays on your machine.
 
 **Supported agents:** Claude Code, Codex, GitHub Copilot, OpenCode, and Pi.
