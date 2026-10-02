@@ -71,6 +71,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/project-workspace-limit`. Les raccourcis et le glisser-déposer étaient d'abord deux commits de correction, `feature/shortcuts-follow-limit` et `feature/reorder-keeps-hidden` ; ils sont fondus ici depuis le 2026-10-05, et leurs tags restent comme trace.
 - **Règle d'abandon :** si upstream rend la limite réglable avec un « More » paginé, prendre le leur. Si la limite devient réglable mais avec un simple déplier/replier, garder notre « More » et me prévenir.
 
+### Masquage des inactifs
+
+- **Objectif :** que la barre latérale montre ce qui est en cours, pas ce qui est fini depuis des semaines, sans rien archiver ni supprimer. Écart voulu à `docs/product.md` (expérience par défaut d'upstream) : le masquage est actif d'emblée, à 14 jours ; upstream ne masque rien.
+- **Comportement :** jamais, 3, 7, 14 ou 30 jours, 14 par défaut. Un workspace _terminé et lu_ (`statusBucket === "done"`) dont `statusEnteredAt` est plus ancien que le seuil passe derrière « More ». Jamais ceux en cours, en attente, en échec, non lus, ni celui affiché à l'écran. Les lignes et les raccourcis lisent la même horloge, arrondie à l'heure : un workspace qui franchit le seuil app ouverte passe derrière « More » dans l'heure, et un raccourci ne vise jamais une ligne cachée. Le réglage n'apparaît qu'en regroupement par projet.
+- **Où :** `display-preferences/project-limit.ts` ; le réglage `sidebarHideInactiveDays` ; `isStaleWorkspace` et `projectWorkspaceGroupOptions` dans `sidebar/limited-sidebar-group.ts` ; l'horloge `useStaleClock` (`sidebar/use-stale-clock.ts`, sur le ticker horaire d'upstream `utils/relative-time-ticker.ts`), lue par `ProjectBlock` (`sidebar-workspace-list.tsx`) et par `SidebarModelProvider` pour les raccourcis.
+- **Preuve :** `sidebar/limited-sidebar-group.test.ts`, `sidebar/use-stale-clock.test.ts`, le test des raccourcis masqués de `sidebar/sidebar-projection.test.ts`, `hooks/use-settings/storage.test.ts`.
+- **Commit d'origine :** `feature/hide-inactive-workspaces`.
+- **Règle d'abandon :** si upstream masque automatiquement les inactifs, prendre le leur. En cas d'équivalence partielle (par exemple de l'archivage automatique), **ne rien retirer** et me demander.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |

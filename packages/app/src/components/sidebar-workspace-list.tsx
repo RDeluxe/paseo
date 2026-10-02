@@ -106,6 +106,7 @@ import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
 import { usePagedSidebarGroup } from "@/components/sidebar/use-paged-sidebar-group";
 import { projectWorkspaceGroupOptions } from "@/components/sidebar/limited-sidebar-group";
+import { useStaleClock } from "@/components/sidebar/use-stale-clock";
 import { SIDEBAR_MORE_PAGE_SIZE } from "@/components/sidebar/display-preferences/project-limit";
 import {
   sidebarWorkspaceRowStyles,
@@ -1612,17 +1613,20 @@ function ProjectBlock({
   supportsPinningByServerId: ReadonlyMap<string, boolean>;
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
 }) {
-  const { workspaceLimit } = useSidebarProjectLimit();
+  const { workspaceLimit, hideInactiveDays } = useSidebarProjectLimit();
+  const staleClock = useStaleClock();
   const workspaceGroupOptions = useMemo(
     () => ({
       ...projectWorkspaceGroupOptions({
         limit: workspaceLimit,
+        hideInactiveDays,
         entriesByKey: workspaceEntriesByKey,
         selection: activeWorkspaceSelection,
+        now: staleClock,
       }),
       pageSize: SIDEBAR_MORE_PAGE_SIZE,
     }),
-    [workspaceLimit, workspaceEntriesByKey, activeWorkspaceSelection],
+    [workspaceLimit, hideInactiveDays, workspaceEntriesByKey, activeWorkspaceSelection, staleClock],
   );
   const {
     visibleItems: visibleWorkspaces,

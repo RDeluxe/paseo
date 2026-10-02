@@ -12,7 +12,7 @@ import {
 } from "@/stores/sidebar-view-store";
 import { DEFAULT_SIDEBAR_CHECKS_DISPLAY, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITY_LAYOUTS, type SidebarDensity, type SidebarDensityLayout } from "./density";
-import type { SidebarWorkspaceLimit } from "./project-limit";
+import type { SidebarHideInactiveDays, SidebarWorkspaceLimit } from "./project-limit";
 import { DEFAULT_SIDEBAR_ROW_ITEMS, type SidebarRowItem, type SidebarRowItems } from "./row-items";
 
 /** The trailing slot holds one thing, so these are a choice rather than toggles. */
@@ -35,6 +35,8 @@ export interface SidebarDisplayPreferences {
   setDensity: (density: SidebarDensity) => void;
   workspaceLimit: SidebarWorkspaceLimit;
   setWorkspaceLimit: (limit: SidebarWorkspaceLimit) => void;
+  hideInactiveDays: SidebarHideInactiveDays;
+  setHideInactiveDays: (days: SidebarHideInactiveDays) => void;
   trailing: SidebarWorkspaceTrailing;
   /** Picking the choice that is already showing clears the slot. */
   toggleTrailing: (choice: SidebarTrailingChoice) => void;
@@ -83,6 +85,7 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       sidebarChecksDisplay,
       sidebarDensity,
       sidebarWorkspaceLimit,
+      sidebarHideInactiveDays,
     },
     updateSettings,
   } = useAppSettings();
@@ -124,6 +127,13 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
     [updateSettings],
   );
 
+  const setHideInactiveDays = useCallback(
+    (days: SidebarHideInactiveDays) => {
+      void updateSettings({ sidebarHideInactiveDays: days });
+    },
+    [updateSettings],
+  );
+
   const toggleTrailing = useCallback(
     (choice: SidebarTrailingChoice) => {
       void updateSettings({
@@ -151,6 +161,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setDensity,
       workspaceLimit: sidebarWorkspaceLimit,
       setWorkspaceLimit,
+      hideInactiveDays: sidebarHideInactiveDays,
+      setHideInactiveDays,
       trailing: sidebarWorkspaceTrailing,
       toggleTrailing,
       hostFilters,
@@ -180,6 +192,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setDensity,
       sidebarWorkspaceLimit,
       setWorkspaceLimit,
+      sidebarHideInactiveDays,
+      setHideInactiveDays,
       sidebarWorkspaceTrailing,
       toggleTrailing,
       hostFilters,
@@ -235,12 +249,18 @@ export function useSidebarDensityLayout(): SidebarDensityLayout {
   return SIDEBAR_DENSITY_LAYOUTS[sidebarDensity];
 }
 
-export type SidebarProjectLimit = Pick<SidebarDisplayPreferences, "workspaceLimit">;
+export type SidebarProjectLimit = Pick<
+  SidebarDisplayPreferences,
+  "workspaceLimit" | "hideInactiveDays"
+>;
 
 /** How many workspaces each project shows, for the project blocks and the shortcuts over them. */
 export function useSidebarProjectLimit(): SidebarProjectLimit {
   const {
-    settings: { sidebarWorkspaceLimit },
+    settings: { sidebarWorkspaceLimit, sidebarHideInactiveDays },
   } = useAppSettings();
-  return useMemo(() => ({ workspaceLimit: sidebarWorkspaceLimit }), [sidebarWorkspaceLimit]);
+  return useMemo(
+    () => ({ workspaceLimit: sidebarWorkspaceLimit, hideInactiveDays: sidebarHideInactiveDays }),
+    [sidebarWorkspaceLimit, sidebarHideInactiveDays],
+  );
 }
