@@ -241,6 +241,7 @@ export type ToolCallDetail =
   | {
       type: "shell";
       command: string;
+      description?: string;
       cwd?: string;
       output?: string;
       exitCode?: number | null;
