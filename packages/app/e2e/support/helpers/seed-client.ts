@@ -270,6 +270,25 @@ export async function seedWorkspace(options: {
   }
 }
 
+/** Adds `count` workspaces to a seeded project, titled `<titlePrefix> 1…count`. Returns their ids. */
+export async function addProjectWorkspaces(
+  seeded: SeededWorkspace,
+  input: { count: number; titlePrefix: string },
+): Promise<string[]> {
+  const workspaceIds: string[] = [];
+  for (let index = 1; index <= input.count; index += 1) {
+    const created = await seeded.client.createWorkspace({
+      source: { kind: "directory", path: seeded.repoPath, projectId: seeded.projectId },
+      title: `${input.titlePrefix} ${index}`,
+    });
+    if (!created.workspace) {
+      throw new Error(created.error ?? `Failed to add workspace ${index} to ${seeded.repoPath}`);
+    }
+    workspaceIds.push(created.workspace.id);
+  }
+  return workspaceIds;
+}
+
 function loadAppVersion(): string {
   const packageJsonPath = path.resolve(__dirname, "../../../package.json");
   const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as { version?: unknown };

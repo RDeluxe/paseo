@@ -1154,6 +1154,10 @@ export const ar: TranslationResources = {
         comfortable: "مريحة",
         compact: "مضغوطة",
       },
+      workspaceLimit: {
+        label: "لكل مشروع",
+        option: "{{count}} من مساحات العمل",
+      },
       grouping: {
         label: "التجميع",
         project: "المشروع",
@@ -1283,6 +1287,7 @@ export const ar: TranslationResources = {
         newWorkspace: "مساحة عمل جديدة",
         showMore: "عرض المزيد",
         showLess: "عرض أقل",
+        more: "المزيد",
         createWorkspaceFor: "قم بإنشاء مساحة عمل جديدة لـ{{projectName}}",
         copyPath: "نسخ المسار",
         copyBranchName: "انسخ اسم الفرع",

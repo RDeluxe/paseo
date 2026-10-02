@@ -825,6 +825,22 @@ describe("appearance settings", () => {
     expect((await loadAppSettingsFromStorage(deps)).sidebarChecksDisplay).toBe("icon");
   });
 
+  it("restores the stored per-project workspace limit and falls back to five", async () => {
+    const stored = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarWorkspaceLimit: 10 }),
+      }),
+    });
+    const unknown = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarWorkspaceLimit: 7 }),
+      }),
+    });
+
+    expect((await loadAppSettingsFromStorage(stored)).sidebarWorkspaceLimit).toBe(10);
+    expect((await loadAppSettingsFromStorage(unknown)).sidebarWorkspaceLimit).toBe(5);
+  });
+
   it("restores the stored sidebar density and falls back to comfortable", async () => {
     const stored = makeDeps({
       storage: createInMemoryKeyValueStorage({

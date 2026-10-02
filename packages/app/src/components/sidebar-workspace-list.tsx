@@ -86,7 +86,11 @@ import { ProjectLeadingVisual } from "@/components/sidebar/project-leading-visua
 import { useToast } from "@/contexts/toast-context";
 import { getForgePresentation, normalizeForge } from "@/git/forge";
 import { toWorktreeArchiveRisk } from "@/git/worktree-archive-warning";
-import { hasVisibleOrderChanged, mergeWithRemainder } from "@/utils/sidebar-reorder";
+import {
+  hasVisibleOrderChanged,
+  mergeIntoVisibleSlots,
+  mergeWithRemainder,
+} from "@/utils/sidebar-reorder";
 import { confirmDialog } from "@/utils/confirm-dialog";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
 import { SidebarStatusWorkspaceList } from "@/components/sidebar/sidebar-status-list";
@@ -99,6 +103,9 @@ import { useLongPressDragInteraction } from "@/components/sidebar/use-long-press
 import { PinnedSectionHeader } from "@/components/sidebar/pinned-section-header";
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
+import { usePagedSidebarGroup } from "@/components/sidebar/use-paged-sidebar-group";
+import { projectWorkspaceGroupOptions } from "@/components/sidebar/limited-sidebar-group";
+import { SIDEBAR_MORE_PAGE_SIZE } from "@/components/sidebar/display-preferences/project-limit";
 import {
   sidebarWorkspaceRowStyles,
   SidebarWorkspaceRowFrame,
@@ -152,6 +159,7 @@ import type { HostBadgeModel } from "@/hosts/appearance";
 import { useHostBadges } from "@/hosts/use-host-badges";
 import {
   useSidebarDensityLayout,
+  useSidebarProjectLimit,
   useSidebarRowItems,
 } from "@/components/sidebar/display-preferences/model";
 import { PullRequestStateIcon } from "@/git/pull-request-state-icon";
@@ -1603,12 +1611,22 @@ function ProjectBlock({
   supportsPinningByServerId: ReadonlyMap<string, boolean>;
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
 }) {
+  const { workspaceLimit } = useSidebarProjectLimit();
+  const workspaceGroupOptions = useMemo(
+    () => ({
+      ...projectWorkspaceGroupOptions({
+        limit: workspaceLimit,
+        selection: activeWorkspaceSelection,
+      }),
+      pageSize: SIDEBAR_MORE_PAGE_SIZE,
+    }),
+    [workspaceLimit, activeWorkspaceSelection],
+  );
   const {
     visibleItems: visibleWorkspaces,
-    expanded: workspacesExpanded,
-    canToggle: canToggleWorkspaces,
-    toggleExpanded: toggleWorkspacesExpanded,
-  } = useLimitedSidebarGroup(project.workspaces);
+    canShowMore: canShowMoreWorkspaces,
+    showMore: showMoreWorkspaces,
+  } = usePagedSidebarGroup(project.workspaces, workspaceGroupOptions);
   const { emptyProjectPlaceholder } = useSidebarDensityLayout();
   const rowModel = useMemo(
     () =>
@@ -1779,10 +1797,10 @@ function ProjectBlock({
             gestureHostPresented={dragGestureHostActive}
             containerStyle={styles.workspaceListContainer}
           />
-          {canToggleWorkspaces ? (
+          {canShowMoreWorkspaces ? (
             <SidebarGroupToggleRow
-              expanded={workspacesExpanded}
-              onPress={toggleWorkspacesExpanded}
+              action="more"
+              onPress={showMoreWorkspaces}
               testID={`sidebar-project-show-more-${project.viewKey}`}
             />
           ) : null}
@@ -2260,7 +2278,7 @@ function ProjectModeList({
 
       setWorkspaceOrder(
         projectViewKey,
-        mergeWithRemainder({
+        mergeIntoVisibleSlots({
           currentOrder: currentWorkspaceOrder,
           reorderedVisibleKeys: reorderedWorkspaceKeys,
         }),
@@ -2451,7 +2469,7 @@ function ProjectModeList({
               />
               {canTogglePinnedChats ? (
                 <SidebarGroupToggleRow
-                  expanded={pinnedChatsExpanded}
+                  action={pinnedChatsExpanded ? "showLess" : "showMore"}
                   onPress={togglePinnedChatsExpanded}
                   testID="sidebar-pinned-show-more"
                 />

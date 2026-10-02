@@ -1167,6 +1167,10 @@ export const ja: TranslationResources = {
         comfortable: "ゆったり",
         compact: "コンパクト",
       },
+      workspaceLimit: {
+        label: "プロジェクトごと",
+        option: "{{count}} 件のワークスペース",
+      },
       grouping: {
         label: "グループ化",
         project: "プロジェクト",
@@ -1297,6 +1301,7 @@ export const ja: TranslationResources = {
         newWorkspace: "新しいワークスペース",
         showMore: "さらに表示",
         showLess: "表示を減らす",
+        more: "さらに",
         createWorkspaceFor: "{{projectName}}の新しいワークスペースを作成",
         copyPath: "パスをコピー",
         copyBranchName: "ブランチ名をコピー",

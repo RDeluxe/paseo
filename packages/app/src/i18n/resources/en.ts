@@ -1162,6 +1162,10 @@ export const en = {
         comfortable: "Comfortable",
         compact: "Compact",
       },
+      workspaceLimit: {
+        label: "Per project",
+        option: "{{count}} workspaces",
+      },
       grouping: {
         label: "Grouping",
         project: "Project",
@@ -1291,6 +1295,7 @@ export const en = {
         newWorkspace: "New workspace",
         showMore: "Show more",
         showLess: "Show less",
+        more: "More",
         createWorkspaceFor: "Create a new workspace for {{projectName}}",
         copyPath: "Copy path",
         copyBranchName: "Copy branch name",
