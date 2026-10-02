@@ -35,6 +35,7 @@ test.describe("Sidebar project filter", () => {
         /^Title/,
         "Show",
         /^Density/,
+        /^Per project/,
         "Project",
         "Show background",
       ]);

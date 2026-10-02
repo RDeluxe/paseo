@@ -11,6 +11,7 @@ import {
 } from "@/stores/sidebar-view-store";
 import { DEFAULT_SIDEBAR_CHECKS_DISPLAY, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITY_LAYOUTS, type SidebarDensity, type SidebarDensityLayout } from "./density";
+import type { SidebarWorkspaceLimit } from "./project-limit";
 import { DEFAULT_SIDEBAR_ROW_ITEMS, type SidebarRowItem, type SidebarRowItems } from "./row-items";
 
 /** The trailing slot holds one thing, so these are a choice rather than toggles. */
@@ -29,6 +30,8 @@ export interface SidebarDisplayPreferences {
   setChecksDisplay: (display: SidebarChecksDisplay) => void;
   density: SidebarDensity;
   setDensity: (density: SidebarDensity) => void;
+  workspaceLimit: SidebarWorkspaceLimit;
+  setWorkspaceLimit: (limit: SidebarWorkspaceLimit) => void;
   trailing: SidebarWorkspaceTrailing;
   /** Picking the choice that is already showing clears the slot. */
   toggleTrailing: (choice: SidebarTrailingChoice) => void;
@@ -74,6 +77,7 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       sidebarRowItems,
       sidebarChecksDisplay,
       sidebarDensity,
+      sidebarWorkspaceLimit,
     },
     updateSettings,
   } = useAppSettings();
@@ -108,6 +112,13 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
     [updateSettings],
   );
 
+  const setWorkspaceLimit = useCallback(
+    (limit: SidebarWorkspaceLimit) => {
+      void updateSettings({ sidebarWorkspaceLimit: limit });
+    },
+    [updateSettings],
+  );
+
   const toggleTrailing = useCallback(
     (choice: SidebarTrailingChoice) => {
       void updateSettings({
@@ -131,6 +142,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setChecksDisplay,
       density: sidebarDensity,
       setDensity,
+      workspaceLimit: sidebarWorkspaceLimit,
+      setWorkspaceLimit,
       trailing: sidebarWorkspaceTrailing,
       toggleTrailing,
       hostFilters,
@@ -156,6 +169,8 @@ export function useSidebarDisplayPreferences(): SidebarDisplayPreferences {
       setChecksDisplay,
       sidebarDensity,
       setDensity,
+      sidebarWorkspaceLimit,
+      setWorkspaceLimit,
       sidebarWorkspaceTrailing,
       toggleTrailing,
       hostFilters,
@@ -209,4 +224,14 @@ export function useSidebarDensityLayout(): SidebarDensityLayout {
     settings: { sidebarDensity },
   } = useAppSettings();
   return SIDEBAR_DENSITY_LAYOUTS[sidebarDensity];
+}
+
+export type SidebarProjectLimit = Pick<SidebarDisplayPreferences, "workspaceLimit">;
+
+/** How many workspaces each project shows, for the project blocks and the shortcuts over them. */
+export function useSidebarProjectLimit(): SidebarProjectLimit {
+  const {
+    settings: { sidebarWorkspaceLimit },
+  } = useAppSettings();
+  return useMemo(() => ({ workspaceLimit: sidebarWorkspaceLimit }), [sidebarWorkspaceLimit]);
 }

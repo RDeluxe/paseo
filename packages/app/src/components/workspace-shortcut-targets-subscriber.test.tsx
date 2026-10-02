@@ -1,7 +1,8 @@
 /**
  * @vitest-environment jsdom
  */
-import React from "react";
+import React, { useState, type ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act } from "@testing-library/react";
 import type { DaemonClient } from "@getpaseo/client/internal/daemon-client";
 import { createRoot, type Root } from "react-dom/client";
@@ -69,6 +70,18 @@ function setHostProfiles(hosts: HostProfile[]): void {
   ).setHostsAndSync(hosts);
 }
 
+/** The sidebar model reads the project limit from the app settings, which live in React Query. */
+function SidebarModelWithSettings({ children }: { children: ReactNode }) {
+  const [queryClient] = useState(
+    () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+  );
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SidebarModelProvider>{children}</SidebarModelProvider>
+    </QueryClientProvider>
+  );
+}
+
 describe("WorkspaceShortcutTargetsSubscriber", () => {
   let root: Root | null = null;
   let container: HTMLElement | null = null;
@@ -127,9 +140,9 @@ describe("WorkspaceShortcutTargetsSubscriber", () => {
   it("publishes workspace shortcut targets without rendering the sidebar", async () => {
     await act(async () => {
       root?.render(
-        <SidebarModelProvider>
+        <SidebarModelWithSettings>
           <WorkspaceShortcutTargetsSubscriber enabled={true} />
-        </SidebarModelProvider>,
+        </SidebarModelWithSettings>,
       );
     });
 
@@ -195,9 +208,9 @@ describe("WorkspaceShortcutTargetsSubscriber", () => {
 
     await act(async () => {
       root?.render(
-        <SidebarModelProvider>
+        <SidebarModelWithSettings>
           <WorkspaceShortcutTargetsSubscriber enabled={true} />
-        </SidebarModelProvider>,
+        </SidebarModelWithSettings>,
       );
     });
 
@@ -229,9 +242,9 @@ describe("WorkspaceShortcutTargetsSubscriber", () => {
 
     await act(async () => {
       root?.render(
-        <SidebarModelProvider>
+        <SidebarModelWithSettings>
           <WorkspaceShortcutTargetsSubscriber enabled={true} />
-        </SidebarModelProvider>,
+        </SidebarModelWithSettings>,
       );
     });
 
@@ -251,17 +264,17 @@ describe("WorkspaceShortcutTargetsSubscriber", () => {
   it("clears targets when disabled", async () => {
     await act(async () => {
       root?.render(
-        <SidebarModelProvider>
+        <SidebarModelWithSettings>
           <WorkspaceShortcutTargetsSubscriber enabled={true} />
-        </SidebarModelProvider>,
+        </SidebarModelWithSettings>,
       );
     });
 
     await act(async () => {
       root?.render(
-        <SidebarModelProvider>
+        <SidebarModelWithSettings>
           <WorkspaceShortcutTargetsSubscriber enabled={false} />
-        </SidebarModelProvider>,
+        </SidebarModelWithSettings>,
       );
     });
 

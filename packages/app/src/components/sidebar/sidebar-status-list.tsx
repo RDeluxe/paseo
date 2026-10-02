@@ -226,7 +226,7 @@ export function SidebarStatusWorkspaceList({
               />
               {canTogglePinnedWorkspaces ? (
                 <SidebarGroupToggleRow
-                  expanded={pinnedWorkspacesExpanded}
+                  action={pinnedWorkspacesExpanded ? "showLess" : "showMore"}
                   onPress={togglePinnedWorkspacesExpanded}
                   testID="sidebar-pinned-show-more"
                 />
@@ -374,7 +374,7 @@ function StatusGroupRows({
           ))}
           {canToggleWorkspaces ? (
             <SidebarGroupToggleRow
-              expanded={workspacesExpanded}
+              action={workspacesExpanded ? "showLess" : "showMore"}
               onPress={toggleWorkspacesExpanded}
               indented
               testID={`sidebar-status-group-show-more-${group.key}`}

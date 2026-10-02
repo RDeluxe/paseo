@@ -1194,6 +1194,10 @@ export const fr: TranslationResources = {
         comfortable: "Confortable",
         compact: "Compacte",
       },
+      workspaceLimit: {
+        label: "Par projet",
+        option: "{{count}} espaces de travail",
+      },
       grouping: {
         label: "Regroupement",
         project: "Projet",
@@ -1324,6 +1328,7 @@ export const fr: TranslationResources = {
         newWorkspace: "Nouvel espace de travail",
         showMore: "Afficher plus",
         showLess: "Afficher moins",
+        more: "Plus",
         createWorkspaceFor: "Créer un espace de travail pour {{projectName}}",
         copyPath: "Copier le chemin",
         copyBranchName: "Copier le nom de la branche",

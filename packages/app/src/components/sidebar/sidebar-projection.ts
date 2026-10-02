@@ -20,6 +20,8 @@ import {
   type SidebarShortcutSection,
 } from "@/utils/sidebar-shortcuts";
 import { statusWorkspaceGroups, type SidebarWorkspaceGroup } from "./sidebar-labels";
+import { projectWorkspaceGroupOptions, splitLimitedGroup } from "./limited-sidebar-group";
+import type { SidebarWorkspaceLimit } from "./display-preferences/project-limit";
 
 export interface SidebarProjection {
   pinnedGroups: PinnedSidebarGroups;
@@ -47,6 +49,7 @@ export interface SidebarProjectionInput {
   collapsedProjectKeys: ReadonlySet<string>;
   collapsedWorkspaceGroupKeys: ReadonlySet<string>;
   t: TFunction;
+  workspaceLimit: SidebarWorkspaceLimit;
 }
 
 export function buildSidebarProjection(input: SidebarProjectionInput): SidebarProjection {
@@ -69,9 +72,15 @@ export function buildSidebarProjection(input: SidebarProjectionInput): SidebarPr
     sections.push({ workspaces: pinnedGroups.pinnedChats });
   }
   if (input.groupMode === "project") {
+    // Numbered from the rows a project shows before "More", so a shortcut never opens a row you
+    // cannot see and the next project's rows still get theirs.
+    const groupOptions = projectWorkspaceGroupOptions({
+      limit: input.workspaceLimit,
+      selection: null,
+    });
     sections.push(
       ...pinnedGroups.unpinnedProjects.map((project) => ({
-        workspaces: project.workspaces,
+        workspaces: splitLimitedGroup(project.workspaces, groupOptions).visible,
         collapsed: input.collapsedProjectKeys.has(project.viewKey),
       })),
     );
