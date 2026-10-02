@@ -1173,6 +1173,11 @@ export const ar: TranslationResources = {
         lastPrompt: "آخر طلب",
         updateHost: "حدّث المضيفين لترتيب مساحات العمل",
       },
+      density: {
+        label: "الكثافة",
+        comfortable: "مريحة",
+        compact: "مضغوطة",
+      },
       grouping: {
         label: "التجميع",
         project: "المشروع",

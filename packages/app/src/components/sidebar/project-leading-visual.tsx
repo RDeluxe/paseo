@@ -22,6 +22,9 @@ import { StatusRing } from "@/components/status-ring";
 import { getStatusRingOffset } from "@/components/status-ring/geometry";
 import type { SidebarSurfaceBackdrop } from "@/styles/surface-backdrop";
 
+/** Compact rows draw the project icon a step smaller; it keeps the same slot and rail. */
+export type ProjectIconSize = "md" | "xs";
+
 // Every surfaced status shares one badge shell, so the badge never changes size or position
 // between states. Only the thing inside it changes.
 // Matches the workspace title's lineHeight (sidebar-workspace-row-content's
@@ -41,6 +44,7 @@ const STATUS_BADGE_OFFSET = -4;
 // the passive status dots.
 const DensityProjectIconView = withUnistyles(ProjectIconView);
 const projectIconProps = densityIconProps("md", () => ({}));
+const projectIconPropsXs = densityIconProps("xs", () => ({}));
 
 const ThemedActivityIndicator = withUnistyles(ActivityIndicator);
 const ThemedCircleAlert = withUnistyles(CircleAlert);
@@ -63,12 +67,14 @@ export function ProjectLeadingVisual({
   statusBucket,
   projectViewKey,
   backdrop,
+  iconSize,
   chevron = null,
   showChevron = false,
   isArchiving = false,
 }: {
   displayName: string;
   iconDataUri: string | null;
+  iconSize: ProjectIconSize;
   /** Aggregate status of the project's workspaces; null when it shouldn't be surfaced. */
   statusBucket: SidebarStateBucket | null;
   projectViewKey: string;
@@ -101,6 +107,7 @@ export function ProjectLeadingVisual({
       projectViewKey={projectViewKey}
       statusBucket={statusBucket}
       backdrop={backdrop}
+      iconSize={iconSize}
     />
   );
 }
@@ -116,6 +123,7 @@ export function ProjectStatusIndicator({
   projectViewKey,
   statusBucket,
   backdrop,
+  iconSize,
   loading = false,
   testID,
 }: {
@@ -125,6 +133,7 @@ export function ProjectStatusIndicator({
   statusBucket: SidebarStateBucket | null;
   /** The row's current background, so the status badge can knock out of it. */
   backdrop: SidebarSurfaceBackdrop;
+  iconSize: ProjectIconSize;
   loading?: boolean;
   testID?: string;
 }) {
@@ -147,11 +156,12 @@ export function ProjectStatusIndicator({
           : "project-icon-only")
       }
     >
-      <View style={styles.projectIconBox}>
+      <View style={iconSize === "xs" ? styles.projectIconBoxXs : styles.projectIconBox}>
         <ProjectIcon
           iconDataUri={iconDataUri}
           placeholderInitial={placeholderInitial}
           projectViewKey={projectViewKey}
+          size={iconSize}
         />
         {badgeContent === null || badgeBucket === null ? null : (
           <ProjectStatusBadge
@@ -227,18 +237,20 @@ function ProjectIcon({
   iconDataUri,
   placeholderInitial,
   projectViewKey,
+  size,
 }: {
   iconDataUri: string | null;
   placeholderInitial: string;
   projectViewKey: string;
+  size: ProjectIconSize;
 }) {
   return (
     <DensityProjectIconView
       iconDataUri={iconDataUri}
       initial={placeholderInitial}
       projectViewKey={projectViewKey}
-      textStyle={styles.projectIconFallbackText}
-      uniProps={projectIconProps}
+      textStyle={size === "xs" ? styles.projectIconFallbackTextXs : styles.projectIconFallbackText}
+      uniProps={size === "xs" ? projectIconPropsXs : projectIconProps}
     />
   );
 }
@@ -290,8 +302,17 @@ const styles = StyleSheet.create((theme) => {
       width: densityIconBox("md"),
       height: densityIconBox("md"),
     },
+    projectIconBoxXs: {
+      position: "relative",
+      width: densityIconBox("xs"),
+      height: densityIconBox("xs"),
+    },
     projectIconFallbackText: {
       fontSize: 9,
+    },
+    // The 16pt box's 9pt initial, scaled with the box.
+    projectIconFallbackTextXs: {
+      fontSize: 7,
     },
     // The shell the alert and dot statuses share. It straddles the icon's bottom-right corner
     // (half in, half out) so the lettered project box stays readable. The shell is a knockout:

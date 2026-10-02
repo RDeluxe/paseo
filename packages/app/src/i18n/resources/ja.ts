@@ -1186,6 +1186,11 @@ export const ja: TranslationResources = {
         lastPrompt: "最後のプロンプト",
         updateHost: "ワークスペースを並べ替えるにはホストを更新してください",
       },
+      density: {
+        label: "表示密度",
+        comfortable: "ゆったり",
+        compact: "コンパクト",
+      },
       grouping: {
         label: "グループ化",
         project: "プロジェクト",
