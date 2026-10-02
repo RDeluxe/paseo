@@ -91,7 +91,11 @@ export interface ProjectWorkspaceGroupInput {
   now: number;
 }
 
-/** How a project limits its workspaces. */
+/**
+ * How a project limits its workspaces. The project block renders from it and the keyboard
+ * shortcuts number from it, so no shortcut lands on a row behind "More". The shortcuts pass no
+ * selection: the selected row keeps its place on screen, not a number.
+ */
 export function projectWorkspaceGroupOptions({
   limit,
   hideInactiveDays,

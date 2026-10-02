@@ -4,7 +4,7 @@ import type {
   SidebarWorkspaceEntry,
   SidebarWorkspacePlacement,
 } from "@/hooks/use-sidebar-workspaces-list";
-import { buildSidebarProjection } from "./sidebar-projection";
+import { buildSidebarProjection, type SidebarProjectionInput } from "./sidebar-projection";
 
 function makeWorkspace(
   id: string,
@@ -66,7 +66,7 @@ function makeProject(
 function projectionInput(options?: {
   groupMode?: "project" | "status";
   pinnedCollapsed?: boolean;
-}) {
+}): SidebarProjectionInput {
   const pinned = makeWorkspace("pinned", "running");
   const unpinned = makeWorkspace("unpinned", "needs_input");
   return {
@@ -85,6 +85,9 @@ function projectionInput(options?: {
     pinnedCollapsed: options?.pinnedCollapsed ?? false,
     collapsedProjectKeys: new Set<string>(),
     collapsedWorkspaceGroupKeys: new Set<string>(),
+    workspaceLimit: 20,
+    hideInactiveDays: 0,
+    now: Date.UTC(2026, 9, 2),
   };
 }
 
@@ -171,6 +174,36 @@ describe("buildSidebarProjection", () => {
 
     expect(projection.shortcutModel.shortcutTargets).toEqual([
       { serverId: "srv", workspaceId: "unpinned" },
+    ]);
+  });
+
+  it("numbers only the rows each project shows before More", () => {
+    const now = Date.UTC(2026, 9, 2);
+    const fresh = ["a", "b", "c", "d"].map((id) => makeWorkspace(id, "running"));
+    const stale = makeWorkspace("stale");
+    stale.entry.statusEnteredAt = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const other = makeWorkspace("other", "running", [], "other-project");
+    const all = [stale, ...fresh, other];
+    const projection = buildSidebarProjection({
+      ...projectionInput(),
+      projects: [
+        makeProject([stale.placement, ...fresh.map((workspace) => workspace.placement)]),
+        makeProject([other.placement], "other-project"),
+      ],
+      pinnedKeys: { pinnedWorkspaceKeys: [], pinnedAtByKey: {} },
+      workspaceEntriesByKey: new Map(
+        all.map((workspace) => [workspace.entry.workspaceKey, workspace.entry]),
+      ),
+      workspaceLimit: 3,
+      hideInactiveDays: 14,
+      now,
+    });
+
+    expect(projection.shortcutModel.shortcutTargets.map((target) => target.workspaceId)).toEqual([
+      "a",
+      "b",
+      "c",
+      "other",
     ]);
   });
 });
