@@ -4,6 +4,9 @@ import { ChevronDown, ChevronRight, CircleAlert } from "lucide-react-native";
 import { ProjectIconView } from "@/components/project-icon-view";
 import { STATUS_BUCKET_LABELS } from "@/hooks/sidebar-status-view-model";
 import { ICON_SIZE, type Theme } from "@/styles/theme";
+
+/** Compact rows draw the project icon a step smaller; it keeps the same slot and rail. */
+export type ProjectIconSize = "md" | "xs";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
 import {
   getProjectStatusBadgeContent,
@@ -59,12 +62,14 @@ export function ProjectLeadingVisual({
   statusBucket,
   projectViewKey,
   backdrop,
+  iconSize,
   chevron = null,
   showChevron = false,
   isArchiving = false,
 }: {
   displayName: string;
   iconDataUri: string | null;
+  iconSize: ProjectIconSize;
   /** Aggregate status of the project's workspaces; null when it shouldn't be surfaced. */
   statusBucket: SidebarStateBucket | null;
   projectViewKey: string;
@@ -97,6 +102,7 @@ export function ProjectLeadingVisual({
       projectViewKey={projectViewKey}
       statusBucket={statusBucket}
       backdrop={backdrop}
+      iconSize={iconSize}
     />
   );
 }
@@ -112,6 +118,7 @@ export function ProjectStatusIndicator({
   projectViewKey,
   statusBucket,
   backdrop,
+  iconSize,
   loading = false,
   testID,
 }: {
@@ -121,6 +128,7 @@ export function ProjectStatusIndicator({
   statusBucket: SidebarStateBucket | null;
   /** The row's current background, so the status badge can knock out of it. */
   backdrop: SidebarSurfaceBackdrop;
+  iconSize: ProjectIconSize;
   loading?: boolean;
   testID?: string;
 }) {
@@ -143,11 +151,12 @@ export function ProjectStatusIndicator({
           : "project-icon-only")
       }
     >
-      <View style={styles.projectIconBox}>
+      <View style={iconSize === "xs" ? styles.projectIconBoxXs : styles.projectIconBox}>
         <ProjectIcon
           iconDataUri={iconDataUri}
           placeholderInitial={placeholderInitial}
           projectViewKey={projectViewKey}
+          size={iconSize}
         />
         {badgeContent === null || badgeBucket === null ? null : (
           <ProjectStatusBadge
@@ -222,18 +231,20 @@ function ProjectIcon({
   iconDataUri,
   placeholderInitial,
   projectViewKey,
+  size,
 }: {
   iconDataUri: string | null;
   placeholderInitial: string;
   projectViewKey: string;
+  size: ProjectIconSize;
 }) {
   return (
     <ProjectIconView
       iconDataUri={iconDataUri}
       initial={placeholderInitial}
       projectViewKey={projectViewKey}
-      size={ICON_SIZE.md}
-      textStyle={styles.projectIconFallbackText}
+      size={ICON_SIZE[size]}
+      textStyle={size === "xs" ? styles.projectIconFallbackTextXs : styles.projectIconFallbackText}
     />
   );
 }
@@ -285,8 +296,17 @@ const styles = StyleSheet.create((theme) => {
       width: theme.iconSize.md,
       height: theme.iconSize.md,
     },
+    projectIconBoxXs: {
+      position: "relative",
+      width: theme.iconSize.xs,
+      height: theme.iconSize.xs,
+    },
     projectIconFallbackText: {
       fontSize: 9,
+    },
+    // The 16pt box's 9pt initial, scaled with the box.
+    projectIconFallbackTextXs: {
+      fontSize: 7,
     },
     // The shell the alert and dot statuses share. It straddles the icon's bottom-right corner
     // (half in, half out) so the lettered project box stays readable. The shell is a knockout:
