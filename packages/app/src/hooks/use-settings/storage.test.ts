@@ -764,6 +764,22 @@ describe("appearance settings", () => {
     expect((await loadAppSettingsFromStorage(unknown)).sidebarHideInactiveDays).toBe(14);
   });
 
+  it("restores the stored project icon and falls back to the avatar", async () => {
+    const stored = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarProjectIcon: "folder" }),
+      }),
+    });
+    const unknown = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarProjectIcon: "emoji" }),
+      }),
+    });
+
+    expect((await loadAppSettingsFromStorage(stored)).sidebarProjectIcon).toBe("folder");
+    expect((await loadAppSettingsFromStorage(unknown)).sidebarProjectIcon).toBe("avatar");
+  });
+
   it("restores the stored sidebar density and falls back to comfortable", async () => {
     const stored = makeDeps({
       storage: createInMemoryKeyValueStorage({
