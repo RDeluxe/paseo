@@ -1150,6 +1150,12 @@ export const zhCN: TranslationResources = {
         label: "每个项目",
         option: "{{count}} 个工作区",
       },
+      hideInactive: {
+        label: "隐藏不活跃的",
+        never: "从不",
+        option: "{{count}} 天后",
+        value: "{{count}} 天",
+      },
       grouping: {
         label: "分组",
         project: "项目",

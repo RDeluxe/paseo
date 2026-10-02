@@ -56,7 +56,7 @@ import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
-import { SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
+import { SIDEBAR_HIDE_INACTIVE_DAYS, SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -208,6 +208,18 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     (count: number) => t("sidebar.display.workspaceLimit.option", { count }),
     [t],
   );
+  const hideInactiveLabel = useCallback(
+    (days: number, form: "option" | "value") => {
+      // 0 is "off", not a number of days.
+      if (days === 0) return t("sidebar.display.hideInactive.never");
+      return t(`sidebar.display.hideInactive.${form}`, { count: days });
+    },
+    [t],
+  );
+  const formatHideInactive = useCallback(
+    (days: number) => hideInactiveLabel(days, "option"),
+    [hideInactiveLabel],
+  );
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -275,19 +287,34 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     ];
 
     if (showProjectLimit) {
-      definitions.push({
-        id: "workspaceLimit",
-        title: t("sidebar.display.workspaceLimit.label"),
-        content: (
-          <OptionList
-            values={SIDEBAR_WORKSPACE_LIMITS}
-            formatLabel={formatWorkspaceLimit}
-            selectedValue={preferences.workspaceLimit}
-            onSelect={preferences.setWorkspaceLimit}
-            testIDPrefix="sidebar-workspace-limit"
-          />
-        ),
-      });
+      definitions.push(
+        {
+          id: "workspaceLimit",
+          title: t("sidebar.display.workspaceLimit.label"),
+          content: (
+            <OptionList
+              values={SIDEBAR_WORKSPACE_LIMITS}
+              formatLabel={formatWorkspaceLimit}
+              selectedValue={preferences.workspaceLimit}
+              onSelect={preferences.setWorkspaceLimit}
+              testIDPrefix="sidebar-workspace-limit"
+            />
+          ),
+        },
+        {
+          id: "hideInactive",
+          title: t("sidebar.display.hideInactive.label"),
+          content: (
+            <OptionList
+              values={SIDEBAR_HIDE_INACTIVE_DAYS}
+              formatLabel={formatHideInactive}
+              selectedValue={preferences.hideInactiveDays}
+              onSelect={preferences.setHideInactiveDays}
+              testIDPrefix="sidebar-hide-inactive"
+            />
+          ),
+        },
+      );
     }
     if (showHostFilter) {
       definitions.push({
@@ -325,6 +352,7 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     hosts,
     showProjectLimit,
     formatWorkspaceLimit,
+    formatHideInactive,
     showHostFilter,
     showProjectFilter,
     allProjects,
@@ -385,6 +413,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
                 testID="sidebar-display-workspace-limit"
               >
                 {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+              <MenuSubTrigger
+                id="hideInactive"
+                value={hideInactiveLabel(preferences.hideInactiveDays, "value")}
+                testID="sidebar-display-hide-inactive"
+              >
+                {t("sidebar.display.hideInactive.label")}
               </MenuSubTrigger>
             </>
           ) : null}

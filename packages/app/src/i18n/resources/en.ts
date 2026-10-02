@@ -1166,6 +1166,12 @@ export const en = {
         label: "Per project",
         option: "{{count}} workspaces",
       },
+      hideInactive: {
+        label: "Hide inactive",
+        never: "Never",
+        option: "After {{count}} days",
+        value: "{{count}}d",
+      },
       grouping: {
         label: "Grouping",
         project: "Project",

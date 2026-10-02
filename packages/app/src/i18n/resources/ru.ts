@@ -1175,6 +1175,12 @@ export const ru: TranslationResources = {
         label: "На проект",
         option: "Рабочих пространств: {{count}}",
       },
+      hideInactive: {
+        label: "Скрывать неактивные",
+        never: "Никогда",
+        option: "Через {{count}} дн.",
+        value: "{{count}} дн.",
+      },
       grouping: {
         label: "Группировка",
         project: "Проект",

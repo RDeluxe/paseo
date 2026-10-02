@@ -1171,6 +1171,12 @@ export const ja: TranslationResources = {
         label: "プロジェクトごと",
         option: "{{count}} 件のワークスペース",
       },
+      hideInactive: {
+        label: "非アクティブを非表示",
+        never: "しない",
+        option: "{{count}} 日後",
+        value: "{{count}}日",
+      },
       grouping: {
         label: "グループ化",
         project: "プロジェクト",
