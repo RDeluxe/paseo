@@ -1123,6 +1123,11 @@ export const fr: TranslationResources = {
     display: {
       trigger: "Préférences d'affichage",
       heading: "Affichage",
+      density: {
+        label: "Densité",
+        comfortable: "Confortable",
+        compact: "Compacte",
+      },
       grouping: {
         label: "Regroupement",
         project: "Projet",

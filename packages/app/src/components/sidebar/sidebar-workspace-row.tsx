@@ -24,6 +24,7 @@ import {
   SidebarWorkspaceMenu,
 } from "@/components/sidebar/sidebar-workspace-menu";
 import {
+  sidebarWorkspaceRowStyles,
   SidebarWorkspaceRowFrame,
   SidebarWorkspaceRowContent,
   resolveTrailingActionVisibility,
@@ -33,6 +34,7 @@ import {
 } from "@/components/sidebar/sidebar-workspace-row-content";
 import { useOpenKebabMenuVisibility } from "@/components/sidebar/use-open-kebab-menu-visibility";
 import { getSidebarRowBackdrop } from "@/components/sidebar/sidebar-row-backdrop";
+import { useIsCompactSidebar } from "@/components/sidebar/display-preferences/model";
 import { selectWorkspaceServiceSummary } from "@/components/sidebar/workspace-meta-row";
 import {
   SidebarWorkspaceTrailingContent,
@@ -269,6 +271,7 @@ function WorkspaceRowBody({
 
   const accessibilityState = useMemo(() => ({ selected }), [selected]);
 
+  const compact = useIsCompactSidebar();
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
       {({ isHovered, contextMenuOpen, onContextMenuOpenChange, hoverHandlers }) => {
@@ -279,6 +282,7 @@ function WorkspaceRowBody({
           isPressed,
           selected,
           isHovered,
+          compact,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -463,14 +467,17 @@ function getWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  compact,
 }: {
   isDragging: boolean;
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  compact: boolean;
 }) {
   return [
     styles.workspaceRow,
+    compact && sidebarWorkspaceRowStyles.rowCompact,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
     isDragging && styles.workspaceRowDragging,

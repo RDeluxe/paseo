@@ -10,6 +10,7 @@ import {
 } from "@/components/sidebar/workspace-meta-row";
 import { WorkspaceHoverCard } from "@/components/workspace-hover-card";
 import type { HostBadgeModel } from "@/hosts/appearance";
+import { HostBadge } from "@/hosts/host-badge";
 import type { SidebarWorkspaceEntry } from "@/hooks/use-sidebar-workspaces-list";
 import {
   hasSidebarWorkspaceTrailing,
@@ -120,12 +121,21 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
   children?: ReactNode;
 }) {
   const {
-    settings: { workspaceTitleSource },
+    settings: { workspaceTitleSource, sidebarDensity },
   } = useAppSettings();
   const workspaceLabel = resolveSidebarWorkspacePrimaryLabel({ workspace, workspaceTitleSource });
   // The workspace carries label names; their colors live in its host's catalog, so the row is
   // where the two meet — the meta line is handed finished definitions.
   const labels = useWorkspaceLabelDefinitions(workspace.serverId, workspace.labels);
+  // Compact rows are one line: the line under the title goes, and the host moves to the end of
+  // the title line as its bare glyph, next to the timestamp, so a row on another machine still
+  // says so. Whether a host shows at all stays the host's own setting: `hostBadge` is null when
+  // it is hidden.
+  const compact = sidebarDensity === "compact";
+  const titleHostBadge = useMemo(
+    () => (compact && hostBadge ? { ...hostBadge, showLabel: false } : null),
+    [compact, hostBadge],
+  );
   const workspaceBranchTextStyle = useMemo(
     () => [
       styles.workspaceBranchText,
@@ -145,6 +155,7 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             projectViewKey={workspace.projectViewKey}
             statusBucket={workspace.statusBucket}
             backdrop={backdrop}
+            iconSize={compact ? "xs" : "md"}
             loading={isLoading}
             testID={`sidebar-row-project-icon-${workspace.workspaceKey}`}
           />
@@ -161,16 +172,21 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             <Text style={workspaceBranchTextStyle} numberOfLines={1}>
               {workspaceLabel}
             </Text>
-            <View style={sidebarWorkspaceRowStyles.rowRight}>{children}</View>
+            <View style={sidebarWorkspaceRowStyles.rowRight}>
+              {titleHostBadge ? <HostBadge badge={titleHostBadge} /> : null}
+              {children}
+            </View>
           </View>
-          <WorkspaceMetaRow
-            currentBranch={workspace.currentBranch}
-            projectName={leadingProjectName}
-            hostBadge={hostBadge ?? null}
-            prHint={workspace.prHint}
-            serviceSummary={serviceSummary}
-            labels={labels}
-          />
+          {compact ? null : (
+            <WorkspaceMetaRow
+              currentBranch={workspace.currentBranch}
+              projectName={leadingProjectName}
+              hostBadge={hostBadge ?? null}
+              prHint={workspace.prHint}
+              serviceSummary={serviceSummary}
+              labels={labels}
+            />
+          )}
         </View>
       </View>
       {showShortcutBadge && shortcutNumber !== null ? (
@@ -285,6 +301,14 @@ export const sidebarWorkspaceRowStyles = StyleSheet.create((theme) => ({
   // pulls the highlight in with the content and the row stops lining up with its header.
   rowIndented: {
     paddingLeft: theme.spacing[2] + theme.spacing[2],
+  },
+  // The compact sidebar density's geometry, shared by every workspace row and the row that ends
+  // a group. Only the padding and the gaps go; the text keeps its size.
+  rowCompact: {
+    minHeight: 24,
+    paddingVertical: theme.spacing[0.5],
+    marginBottom: 0,
+    gap: theme.spacing[0.5],
   },
   rowRight: {
     flexDirection: "row",
