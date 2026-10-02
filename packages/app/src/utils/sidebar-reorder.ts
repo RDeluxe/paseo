@@ -7,6 +7,28 @@ export function mergeWithRemainder(input: {
   return [...input.reorderedVisibleKeys, ...remainder];
 }
 
+/**
+ * For a list whose visible rows are not its first ones — a project hides stale workspaces in the
+ * middle and keeps the selected one on screen from further down. The reordered rows go back into
+ * the slots the visible rows held, so the rows you could not see keep their place.
+ */
+export function mergeIntoVisibleSlots(input: {
+  currentOrder: string[];
+  reorderedVisibleKeys: string[];
+}): string[] {
+  const reorderedSet = new Set(input.reorderedVisibleKeys);
+  const unplaced = input.reorderedVisibleKeys.filter((key) => !input.currentOrder.includes(key));
+  const placed = input.reorderedVisibleKeys.filter((key) => input.currentOrder.includes(key));
+  let next = 0;
+  const merged = input.currentOrder.map((key) => {
+    if (!reorderedSet.has(key)) return key;
+    const slotKey = placed[next];
+    next += 1;
+    return slotKey;
+  });
+  return [...unplaced, ...merged];
+}
+
 export function hasVisibleOrderChanged(input: {
   currentOrder: string[];
   reorderedVisibleKeys: string[];
