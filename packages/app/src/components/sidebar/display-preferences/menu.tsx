@@ -47,6 +47,8 @@ import { resolveSidebarProjectIconTargets } from "@/utils/sidebar-project-row-mo
 import { projectIconPlaceholderLabelFromDisplayName } from "@/utils/project-display-name";
 import type { SidebarProjectEntry } from "@/hooks/use-sidebar-workspaces-list";
 import type { Theme } from "@/styles/theme";
+import { useSidebarCollapsedSectionsStore } from "@/stores/sidebar-collapsed-sections-store";
+import { STATUS_BUCKET_ORDER } from "@/utils/sidebar-agent-state";
 import {
   hasActiveSidebarLabelFilter,
   SIDEBAR_UNLABELLED_LABEL_KEY,
@@ -173,7 +175,8 @@ const DENSITY_LABEL_KEYS: Record<SidebarDensity, string> = {
  *
  * The root is one row per decision with its current value; the options live a level down. The
  * shape is deliberate — every option of every decision on one surface is what this menu used to
- * be, and it grew a row for each host on top of that.
+ * be, and it grew a row for each host on top of that. The two rows at the very end are actions
+ * rather than decisions: they fold or unfold the whole list at once, and leave nothing to show.
  */
 export function SidebarDisplayPreferencesMenu(): ReactElement {
   const { t } = useTranslation();
@@ -219,6 +222,16 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   const formatHideInactive = useCallback(
     (days: number) => hideInactiveLabel(days, "option"),
     [hideInactiveLabel],
+  );
+  const collapseAll = useSidebarCollapsedSectionsStore((state) => state.collapseAll);
+  const expandAll = useSidebarCollapsedSectionsStore((state) => state.expandAll);
+  const collapseAllSections = useCallback(
+    () =>
+      collapseAll({
+        projectKeys: allProjects.map((project) => project.viewKey),
+        workspaceGroupKeys: STATUS_BUCKET_ORDER,
+      }),
+    [allProjects, collapseAll],
   );
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
@@ -464,6 +477,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
               </MenuSubTrigger>
             </>
           ) : null}
+          <MenuSeparator />
+          <MenuItem onSelect={collapseAllSections} testID="sidebar-collapse-all">
+            {t("sidebar.display.collapseAll")}
+          </MenuItem>
+          <MenuItem onSelect={expandAll} testID="sidebar-expand-all">
+            {t("sidebar.display.expandAll")}
+          </MenuItem>
         </MenuSurface>
       </MenuRoot>
       <WorkspaceLabelManagerModal visible={managerOpen} onClose={closeManager} />

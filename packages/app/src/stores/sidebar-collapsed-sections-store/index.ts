@@ -3,7 +3,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { createValidatedPersistStorage } from "@/storage/validated-persist-storage";
 import {
+  collapseAllSections,
   type CollapsedProjectsState,
+  type CollapsibleSectionKeys,
+  expandAllSections,
   type PersistedCollapsedProjects,
   mergePersistedCollapsedProjects,
   PersistedCollapsedProjectsSchema,
@@ -19,6 +22,8 @@ interface SidebarCollapsedSectionsState extends CollapsedProjectsState {
   setProjectCollapsed: (projectKey: string, collapsed: boolean) => void;
   toggleWorkspaceGroupCollapsed: (workspaceGroupKey: string) => void;
   togglePinnedCollapsed: () => void;
+  collapseAll: (keys: CollapsibleSectionKeys) => void;
+  expandAll: () => void;
 }
 
 export const useSidebarCollapsedSectionsStore = create<SidebarCollapsedSectionsState>()(
@@ -34,6 +39,8 @@ export const useSidebarCollapsedSectionsStore = create<SidebarCollapsedSectionsS
       toggleWorkspaceGroupCollapsed: (workspaceGroupKey) =>
         set((state) => toggleWorkspaceGroupCollapsed(state, workspaceGroupKey)),
       togglePinnedCollapsed: () => set((state) => togglePinnedCollapsed(state)),
+      collapseAll: (keys) => set((state) => collapseAllSections(state, keys)),
+      expandAll: () => set((state) => expandAllSections(state)),
     }),
     {
       name: "sidebar-collapsed-sections",

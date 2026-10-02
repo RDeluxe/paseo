@@ -1171,6 +1171,8 @@ export const ko: TranslationResources = {
         option: "{{count}}일 후",
         value: "{{count}}일",
       },
+      collapseAll: "모두 접기",
+      expandAll: "모두 펼치기",
       grouping: {
         label: "그룹화",
         project: "프로젝트",

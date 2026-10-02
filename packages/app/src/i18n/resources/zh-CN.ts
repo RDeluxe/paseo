@@ -1156,6 +1156,8 @@ export const zhCN: TranslationResources = {
         option: "{{count}} 天后",
         value: "{{count}} 天",
       },
+      collapseAll: "全部折叠",
+      expandAll: "全部展开",
       grouping: {
         label: "分组",
         project: "项目",
