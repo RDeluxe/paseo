@@ -1178,6 +1178,7 @@ export const ptBR: TranslationResources = {
       density: {
         label: "Densidade",
         comfortable: "Confortável",
+        semiCompact: "Semicompacta",
         compact: "Compacta",
       },
       workspaceLimit: {

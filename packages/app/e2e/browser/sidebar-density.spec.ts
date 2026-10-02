@@ -54,4 +54,29 @@ test.describe("Sidebar density", () => {
       await workspace.cleanup();
     }
   });
+
+  test("semi-compact keeps the line under the title in less height", async ({ page }) => {
+    const workspace = await seedWorkspace({ repoPrefix: "sidebar-density-", title: "Two lines" });
+    try {
+      await gotoAppShell(page);
+      const row = page.getByTestId(
+        `sidebar-workspace-row-${getServerId()}:${workspace.workspaceId}`,
+      );
+      await expect(row).toBeVisible({ timeout: 30_000 });
+      await openSidebarDisplayPage(page, "sidebar-display-show");
+      await page.getByTestId("sidebar-row-item-branch").click();
+      await closeSidebarDisplayPreferences(page);
+      await expect(row.getByTestId("sidebar-workspace-branch")).toBeVisible();
+      const comfortableHeight = await rowHeight(page, workspace.workspaceId);
+
+      await selectSidebarDensity(page, "semiCompact");
+
+      await expect
+        .poll(() => rowHeight(page, workspace.workspaceId))
+        .toBeLessThan(comfortableHeight);
+      await expect(row.getByTestId("sidebar-workspace-branch")).toBeVisible();
+    } finally {
+      await workspace.cleanup();
+    }
+  });
 });

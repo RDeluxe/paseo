@@ -1179,6 +1179,7 @@ export const fr: TranslationResources = {
       density: {
         label: "Densité",
         comfortable: "Confortable",
+        semiCompact: "Semi-compacte",
         compact: "Compacte",
       },
       workspaceLimit: {
