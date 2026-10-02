@@ -31,6 +31,24 @@ describe("opencode tool-call mapper", () => {
     }
   });
 
+  it("keeps the agent's description of a bash call", () => {
+    const item = expectMapped(
+      mapOpencodeToolCall({
+        toolName: "bash",
+        callId: "opencode-call-described",
+        status: "running",
+        input: { command: "npm test", description: "Run the unit tests" },
+        output: null,
+      }),
+    );
+
+    expect(item.detail).toEqual({
+      type: "shell",
+      command: "npm test",
+      description: "Run the unit tests",
+    });
+  });
+
   it("maps running known tool variants with detail for early summaries", () => {
     const readItem = expectMapped(
       mapOpencodeToolCall({

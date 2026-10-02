@@ -3714,6 +3714,7 @@ function buildShellToolDetail(context: MapToolDetailContext): ToolCallDetail {
       buildShellCommand(rawInput) ??
       readString(rawInput, ["command"]) ??
       snapshot.title,
+    description: readString(rawInput, ["description"]),
     cwd: terminalContent?.cwd ?? readString(rawInput, ["cwd"]),
     output: terminalContent?.output ?? textContent ?? readString(rawOutput, ["output", "text"]),
     exitCode: terminalContent?.exitCode ?? readNumber(rawOutput, ["exitCode"]),

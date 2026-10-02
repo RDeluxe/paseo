@@ -35,7 +35,7 @@ Chaque commit du fork est écrit comme s'il était proposé à upstream. Les doc
 | [`docs/i18n.md`](docs/i18n.md), [`docs/glossary.md`](docs/glossary.md)                                                             | Les textes : toutes les langues d'upstream, et ses termes (workspace, project, host).                                                                                                                                                                                                                                                                                          |
 | [`docs/coding-standards.md`](docs/coding-standards.md), [`docs/unistyles.md`](docs/unistyles.md), [`docs/hover.md`](docs/hover.md) | Le code : typage dérivé des types canoniques, organisation des fichiers, styles et survol.                                                                                                                                                                                                                                                                                     |
 | [`docs/testing.md`](docs/testing.md), [`docs/qa.md`](docs/qa.md)                                                                   | Les preuves : un test réel à côté du code, et les quatre questions de la QA. Toutes les preuves de ce fichier sont faites dans le navigateur (Playwright) et dans l'app macOS ; rien n'est testé sur iOS, Android, Windows ni Linux.                                                                                                                                           |
-| [`docs/protocol-compatibility.md`](docs/protocol-compatibility.md), [`docs/protocol-validation.md`](docs/protocol-validation.md)   | Le démon et le protocole : le fork n'y touche pas (voir « Modifications propres au fork ») ; s'il le faisait un jour, ces deux documents s'appliqueraient.                                                                                                                                                                                                                     |
+| [`docs/protocol-compatibility.md`](docs/protocol-compatibility.md), [`docs/protocol-validation.md`](docs/protocol-validation.md)   | Le démon et le protocole : voir « Démon et protocole ».                                                                                                                                                                                                                                                                                                                        |
 
 Comment les appliquer :
 
@@ -45,7 +45,7 @@ Comment les appliquer :
 
 ## Nos fonctions
 
-Toutes côté client (`packages/app`), réglables dans **Préférences d'affichage** (l'icône à curseurs en haut de la liste des workspaces). Leurs préférences sont des réglages d'upstream (`hooks/use-settings/storage.ts`), lus par `display-preferences/model.ts`.
+Les fonctions de la barre latérale sont côté client (`packages/app`), réglables dans **Préférences d'affichage** (l'icône à curseurs en haut de la liste des workspaces). Leurs préférences sont des réglages d'upstream (`hooks/use-settings/storage.ts`), lus par `display-preferences/model.ts`. La description des commandes touche aussi le démon et le protocole, dans les limites fixées plus bas (« Démon et protocole »).
 
 Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle que soit la forme du code), son comportement, l'endroit où elle vit, sa preuve, son **commit d'origine** et sa règle d'abandon.
 
@@ -107,6 +107,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/folder-project-icons`.
 - **Règle d'abandon :** si upstream propose des dossiers à la place des avatars, prendre les leurs.
 
+### Description des commandes
+
+- **Objectif :** comprendre ce que fait l'agent sans lire ses scripts, comme dans Claude Code et Cursor. Quand l'agent décrit sa commande (« Chercher toutes les mentions de Freescout »), la ligne affiche cette phrase ; la commande brute ne sert qu'à qui la déplie.
+- **Comportement :** une ligne de commande affiche `Shell` suivi de la description donnée par l'agent ; sans description, la commande, comme upstream. Le détail déplié montre toujours la commande et sa sortie. Seul l'affichage de l'app change : le démon continue de résumer l'appel par sa commande (`[Shell] grep …`) dans ce qu'il dit aux autres agents (outils MCP, contexte d'un fork, résumés des sous-agents), car c'est la commande qui leur sert. Ce que chaque harness fournit : Claude Code et OpenCode, le champ `description` de leur outil bash ; un agent ACP, le champ `description` de son `rawInput` s'il en a un (c'est le cas de l'adaptateur ACP de Claude). Cursor (`cursor-agent acp`) n'envoie que la commande, dans `rawInput.command` comme dans `title` (vérifié le 2026-10-02) : ses lignes restent sur la commande. Codex, Pi et OMP n'ont pas de description dans leurs appels. Pour qu'un nouveau harness en profite, son parseur remplit `description` du détail `shell`, et rien d'autre ne change.
+- **Où :** le champ facultatif `description` du détail `shell` (`packages/protocol/src/agent-types.ts`, son schéma dans `messages.ts`, et la copie du type dans `packages/server/src/server/agent/agent-sdk-types.ts`) ; le libellé, choisi dans l'app par `buildToolCallPresentation` (`packages/app/src/tool-calls/presentation.ts`), et non dans le modèle partagé `packages/protocol/src/tool-call-display.ts` que le démon lit aussi ; la lecture côté démon dans `ToolShellInputSchema` et `toShellToolDetail` (`providers/tool-call-detail-primitives.ts`, partagés par Claude, Codex et OpenCode) et dans `buildShellToolDetail` (`providers/acp-agent.ts`).
+- **Preuve :** `app/src/tool-calls/presentation.test.ts`, `protocol/src/messages.tool-call-schema.test.ts`, les tests des mappers de `claude`, `opencode` et `acp-agent`, et celui de `server/src/server/agent/activity-curator.test.ts` qui garde la commande dans le texte destiné aux autres agents.
+- **Commit d'origine :** `feature/shell-command-descriptions`.
+- **Règle d'abandon :** si upstream transporte et affiche la description des commandes, prendre la leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -118,7 +127,19 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 | Encadré « fork » en tête de `CLAUDE.md`                                                   | `CLAUDE.md` (`AGENTS.md` est un lien)           | Envoie tout agent vers ce fichier.                                                                                                                                                                                                                                                                                                                                                                                 |
 | `FORK.md`                                                                                 | racine                                          | Ce fichier.                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'app du fork remplace l'officielle et réutilise `~/.paseo` (mon historique). **On ne touche jamais au démon (`packages/server`) ni au protocole (`packages/protocol`)**, pour que l'app mobile officielle et le démon officiel restent compatibles.
+On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'app du fork remplace l'officielle et réutilise `~/.paseo` (mon historique).
+
+### Démon et protocole
+
+L'app mobile officielle doit pouvoir parler au démon du fork, et l'app du fork à un démon officiel (une autre machine). Le démon (`packages/server`) et le protocole (`packages/protocol`) ne changent donc que **par ajout de champs facultatifs** :
+
+- jamais de champ renommé, retiré ou rendu obligatoire, jamais de nouveau message ni de nouveau type de détail ;
+- l'app officielle ignore le champ : le protocole n'est pas strict. Le validateur généré que l'app utilise laisse passer les clés inconnues, et Zod les retire ; aucun des deux ne rejette le message ([`docs/protocol-validation.md`](docs/protocol-validation.md)) ;
+- l'app du fork, face à un démon officiel, ne reçoit pas le champ et retombe sur le comportement d'upstream.
+
+C'est le « protocol contract » de [`docs/protocol-compatibility.md`](docs/protocol-compatibility.md), en plus strict : champs `.optional()`, schémas purs (pas de `.transform()`, `.catch()` ni `.preprocess()` sur un message), `z.discriminatedUnion()` quand les branches partagent un tag. Avant tout commit qui touche le protocole, répondre oui à ses deux questions : une app vieille de six mois lit-elle encore ce message ? un démon vieux de six mois envoie-t-il encore quelque chose que l'app accepte ?
+
+Une fonction qui demanderait une nouvelle capacité du démon relèverait de son « feature contract » (un drapeau dans `server_info.features`, vérifié à un seul endroit) : elle sort des limites du fork. Une fonction qui ne tient pas dans ces limites se fait côté app, ou pas du tout. Aujourd'hui, seule la description des commandes s'en sert, et elle n'a pas besoin de drapeau : la description est une donnée facultative, absente aussi chez les harness qui n'en donnent pas, pas une capacité ; l'afficher quand elle est là et la commande sinon n'est pas un repli pour vieux démons, donc pas de balise `COMPAT(...)`.
 
 ## Modèle de branches
 
@@ -142,7 +163,9 @@ On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'ap
    npm ci && npm run build:app-deps && npm run build:server-deps
    (cd packages/app && npm run typecheck)
    (cd packages/desktop && npm run typecheck)
-   (cd packages/app && npx vitest run src/components/sidebar src/components/workspace-shortcut-targets-subscriber.test.tsx src/hooks/use-settings src/utils src/stores src/i18n)
+   (cd packages/app && npx vitest run src/components/sidebar src/components/workspace-shortcut-targets-subscriber.test.tsx src/tool-calls/presentation.test.ts src/hooks/use-settings src/utils src/stores src/i18n)
+   (cd packages/protocol && npx vitest run src/messages.tool-call-schema.test.ts)
+   (cd packages/server && npm run typecheck && npx vitest run src/server/agent/activity-curator.test.ts src/server/agent/providers/acp-agent.test.ts src/server/agent/providers/claude/tool-call-mapper.test.ts src/server/agent/providers/opencode/tool-call-mapper.test.ts)
    (cd packages/app && npx playwright test e2e/browser/sidebar-*.spec.ts e2e/browser/host-appearance.spec.ts)
    git diff --name-only --diff-filter=d <nouveau-tag>..main | grep -E '\.(ts|tsx)$' | xargs npm run lint --
    git diff --name-only --diff-filter=d <nouveau-tag>..main | grep -E '\.(ts|tsx|json|md|yml)$' | xargs npm run format:check:files --

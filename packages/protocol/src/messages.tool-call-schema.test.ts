@@ -81,6 +81,19 @@ describe("shared messages tool_call schema", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("parses shell detail with the agent's description", () => {
+    const parsed = AgentTimelineItemPayloadSchema.parse({
+      ...canonicalBase(),
+      detail: { type: "shell", command: "pwd", description: "Show the working directory" },
+      status: "completed",
+      error: null,
+    });
+
+    expect(parsed).toMatchObject({
+      detail: { type: "shell", command: "pwd", description: "Show the working directory" },
+    });
+  });
+
   it("rejects legacy status/error combinations without normalization", () => {
     const completedWithError = AgentTimelineItemPayloadSchema.safeParse({
       ...canonicalBase(),
