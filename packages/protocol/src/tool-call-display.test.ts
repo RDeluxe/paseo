@@ -21,6 +21,27 @@ describe("shared tool-call display mapping", () => {
     });
   });
 
+  it("summarizes a shell call by its description, falling back to the command", () => {
+    const shellCall = {
+      name: "Bash",
+      status: "completed",
+      error: null,
+    } as const;
+
+    expect(
+      buildToolCallDisplayModel({
+        ...shellCall,
+        detail: { type: "shell", command: "grep -rn freescout .", description: "Find mentions" },
+      }),
+    ).toEqual({ displayName: "Shell", summary: "Find mentions" });
+    expect(
+      buildToolCallDisplayModel({
+        ...shellCall,
+        detail: { type: "shell", command: "grep -rn freescout ." },
+      }),
+    ).toEqual({ displayName: "Shell", summary: "grep -rn freescout ." });
+  });
+
   it("does not infer summaries from unknown raw detail", () => {
     const display = buildToolCallDisplayModel({
       name: "exec_command",

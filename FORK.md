@@ -24,7 +24,7 @@ Au rebase, les conflits se résolvent en comprenant les deux intentions, celle d
 
 ## Nos fonctions
 
-Toutes côté client (`packages/app`), réglables dans **Préférences d'affichage** (l'icône à curseurs en haut de la liste des workspaces). Leurs préférences sont des réglages d'upstream (`hooks/use-settings/storage.ts`), lus par `display-preferences/model.ts`.
+Les fonctions de la barre latérale sont côté client (`packages/app`), réglables dans **Préférences d'affichage** (l'icône à curseurs en haut de la liste des workspaces). Leurs préférences sont des réglages d'upstream (`hooks/use-settings/storage.ts`), lus par `display-preferences/model.ts`. La description des commandes touche aussi le démon et le protocole, dans les limites fixées plus bas (« Démon et protocole »).
 
 Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle que soit la forme du code), son comportement, l'endroit où elle vit, sa preuve, son **commit d'origine** et sa règle d'abandon.
 
@@ -104,6 +104,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/folder-project-icons`.
 - **Règle d'abandon :** si upstream propose des dossiers à la place des avatars, prendre les leurs.
 
+### Description des commandes
+
+- **Objectif :** comprendre ce que fait l'agent sans lire ses scripts, comme dans Claude Code et Cursor. Quand l'agent décrit sa commande (« Chercher toutes les mentions de Freescout »), la ligne affiche cette phrase ; la commande brute ne sert qu'à qui la déplie.
+- **Comportement :** une ligne de commande affiche `Shell` suivi de la description donnée par l'agent ; sans description, la commande, comme upstream. Le détail déplié montre toujours la commande et sa sortie. Ce que chaque harness fournit : Claude Code et OpenCode, le champ `description` de leur outil bash ; un agent ACP, le champ `description` de son `rawInput` s'il en a un (c'est le cas de l'adaptateur ACP de Claude). Cursor (`cursor-agent acp`) n'envoie que la commande, dans `rawInput.command` comme dans `title` (vérifié le 2026-10-02) : ses lignes restent sur la commande. Codex, Pi et OMP n'ont pas de description dans leurs appels. Pour qu'un nouveau harness en profite, son parseur remplit `description` du détail `shell`, et rien d'autre ne change.
+- **Où :** le champ facultatif `description` du détail `shell` (`packages/protocol/src/agent-types.ts`, son schéma dans `messages.ts`, et la copie du type dans `packages/server/src/server/agent/agent-sdk-types.ts`) ; le libellé dans `packages/protocol/src/tool-call-display.ts` ; la lecture côté démon dans `ToolShellInputSchema` et `toShellToolDetail` (`providers/tool-call-detail-primitives.ts`, partagés par Claude, Codex et OpenCode) et dans `buildShellToolDetail` (`providers/acp-agent.ts`).
+- **Preuve :** `protocol/src/tool-call-display.test.ts`, `protocol/src/messages.tool-call-schema.test.ts`, et les tests des mappers de `claude`, `opencode` et `acp-agent`.
+- **Commit d'origine :** `feature/shell-command-descriptions`.
+- **Règle d'abandon :** si upstream transporte et affiche la description des commandes, prendre la leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -115,7 +124,17 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 | Encadré « fork » en tête de `CLAUDE.md`                                                   | `CLAUDE.md` (`AGENTS.md` est un lien)           | Envoie tout agent vers ce fichier.                                                                                                                                                                                                                                                                                                                                                                                 |
 | `FORK.md`                                                                                 | racine                                          | Ce fichier.                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'app du fork remplace l'officielle et réutilise `~/.paseo` (mon historique). **On ne touche jamais au démon (`packages/server`) ni au protocole (`packages/protocol`)**, pour que l'app mobile officielle et le démon officiel restent compatibles.
+On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'app du fork remplace l'officielle et réutilise `~/.paseo` (mon historique).
+
+### Démon et protocole
+
+L'app mobile officielle doit pouvoir parler au démon du fork, et l'app du fork à un démon officiel (une autre machine). Le démon (`packages/server`) et le protocole (`packages/protocol`) ne changent donc que **par ajout de champs facultatifs** :
+
+- jamais de champ renommé, retiré ou rendu obligatoire, jamais de nouveau message ni de nouveau type de détail ;
+- l'app officielle ignore le champ : les schémas zod du protocole ne sont pas stricts, ils retirent les clés qu'ils ne connaissent pas sans rejeter le message ;
+- l'app du fork, face à un démon officiel, ne reçoit pas le champ et retombe sur le comportement d'upstream.
+
+Une fonction qui ne tient pas dans ces limites se fait côté app, ou pas du tout. Aujourd'hui, seule la description des commandes s'en sert.
 
 ## Modèle de branches
 
@@ -137,6 +156,7 @@ On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'ap
    - `npm ci`, puis `npm run build:app-deps` et `npm run build:server-deps` ;
    - `cd packages/app && npx tsgo --noEmit` ;
    - `npx vitest run src/components/sidebar src/hooks/use-settings src/utils src/stores src/i18n` ;
+   - `cd packages/protocol && npx vitest run src/tool-call-display.test.ts src/messages.tool-call-schema.test.ts`, puis `cd packages/server && npm run typecheck && npx vitest run src/server/agent/providers/acp-agent.test.ts src/server/agent/providers/claude/tool-call-mapper.test.ts src/server/agent/providers/opencode/tool-call-mapper.test.ts` ;
    - `npx playwright test e2e/browser/sidebar-*.spec.ts e2e/browser/host-appearance.spec.ts` (tous les tests de barre latérale, ceux d'upstream compris ; installer d'abord `npx playwright install chromium` si besoin) ;
    - depuis la racine : `npx oxlint` et `npx oxfmt --check` sur les fichiers modifiés.
 
