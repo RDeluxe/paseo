@@ -1200,6 +1200,8 @@ export const es: TranslationResources = {
         option: "Después de {{count}} días",
         value: "{{count}} d",
       },
+      collapseAll: "Contraer todo",
+      expandAll: "Expandir todo",
       grouping: {
         label: "Agrupación",
         project: "Proyecto",
