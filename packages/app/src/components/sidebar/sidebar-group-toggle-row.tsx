@@ -9,6 +9,15 @@ import { DensityIcon } from "@/components/ui/density-icon";
 import { density, densityIconBox } from "@/styles/density";
 import { useSidebarDensityLayout } from "@/components/sidebar/display-preferences/model";
 
+/** Show more and Show less fold a group open and shut; More pages it open and stays. */
+export type SidebarGroupToggleAction = "showMore" | "showLess" | "more";
+
+const TOGGLE_LABEL_KEYS: Record<SidebarGroupToggleAction, string> = {
+  showMore: "sidebar.workspace.actions.showMore",
+  showLess: "sidebar.workspace.actions.showLess",
+  more: "sidebar.workspace.actions.more",
+};
+
 /**
  * The row that ends a truncated group. It is a workspace row that happens to say "Show more", so
  * it takes the workspace row's geometry — height, padding, radius, and both fills — rather than a
@@ -18,22 +27,24 @@ import { useSidebarDensityLayout } from "@/components/sidebar/display-preference
  * `indented` because the two groupings disagree: status rows sit on their header's label rail and
  * project rows sit flush, so the caller says which list this row is ending. The indent itself is
  * the workspace row's, imported rather than re-derived.
+ *
+ * `more` is the project list's paging row: each press shows the next page and nothing folds back,
+ * so there is no chevron to point a direction. The status slot stays, empty, so "More" still
+ * lands on the titles' rail.
  */
 export function SidebarGroupToggleRow({
-  expanded,
+  action,
   onPress,
   indented = false,
   testID,
 }: {
-  expanded: boolean;
+  action: SidebarGroupToggleAction;
   onPress: () => void;
   indented?: boolean;
   testID: string;
 }) {
   const { t } = useTranslation();
-  const label = t(
-    expanded ? "sidebar.workspace.actions.showLess" : "sidebar.workspace.actions.showMore",
-  );
+  const label = t(TOGGLE_LABEL_KEYS[action]);
   const { tightRows } = useSidebarDensityLayout();
   const rowStyle = useCallback(
     ({ hovered = false, pressed }: PressableStateCallbackType & { hovered?: boolean }) => [
@@ -57,11 +68,13 @@ export function SidebarGroupToggleRow({
       {({ hovered, pressed }) => (
         <>
           <View style={styles.iconSlot}>
-            <DensityIcon
-              icon={expanded ? ChevronUp : ChevronDown}
-              size="sm"
-              color={hovered || pressed ? "foreground" : "foregroundMuted"}
-            />
+            {action === "more" ? null : (
+              <DensityIcon
+                icon={action === "showLess" ? ChevronUp : ChevronDown}
+                size="sm"
+                color={hovered || pressed ? "foreground" : "foregroundMuted"}
+              />
+            )}
           </View>
           <Text style={hovered || pressed ? styles.textHovered : styles.text} numberOfLines={1}>
             {label}
