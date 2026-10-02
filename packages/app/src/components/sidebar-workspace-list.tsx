@@ -86,7 +86,11 @@ import { ProjectLeadingVisual } from "@/components/sidebar/project-leading-visua
 import { useToast } from "@/contexts/toast-context";
 import { getForgePresentation, normalizeForge } from "@/git/forge";
 import { toWorktreeArchiveRisk } from "@/git/worktree-archive-warning";
-import { hasVisibleOrderChanged, mergeWithRemainder } from "@/utils/sidebar-reorder";
+import {
+  hasVisibleOrderChanged,
+  mergeIntoVisibleSlots,
+  mergeWithRemainder,
+} from "@/utils/sidebar-reorder";
 import { confirmDialog } from "@/utils/confirm-dialog";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
 import { SidebarStatusWorkspaceList } from "@/components/sidebar/sidebar-status-list";
@@ -2277,7 +2281,7 @@ function ProjectModeList({
 
       setWorkspaceOrder(
         projectViewKey,
-        mergeWithRemainder({
+        mergeIntoVisibleSlots({
           currentOrder: currentWorkspaceOrder,
           reorderedVisibleKeys: reorderedWorkspaceKeys,
         }),

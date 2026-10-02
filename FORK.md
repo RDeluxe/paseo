@@ -68,6 +68,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/shortcuts-follow-limit`.
 - **Règle d'abandon :** disparaît avec la limite par projet.
 
+### Glisser-déposer qui respecte les lignes cachées
+
+- **Objectif :** que la limite et le masquage ne cassent pas l'ordre manuel des workspaces. Upstream supposait que les lignes visibles étaient toujours les premières de la liste.
+- **Comportement :** réordonner les lignes visibles d'un projet ne déplace plus les workspaces cachés derrière « More ».
+- **Où :** `mergeIntoVisibleSlots` dans `utils/sidebar-reorder.ts`, utilisé par `handleWorkspaceReorder` dans `sidebar-workspace-list.tsx`.
+- **Preuve :** `utils/sidebar-reorder.test.ts`.
+- **Commit d'origine :** `feature/reorder-keeps-hidden`.
+- **Règle d'abandon :** disparaît avec la limite par projet.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
