@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { SidebarWorkspacePlacement } from "@/hooks/use-sidebar-workspaces-list";
 import {
+  isStaleWorkspace,
   projectWorkspaceGroupOptions,
   revealMore,
   splitLimitedGroup,
 } from "./limited-sidebar-group";
+
+const NOW = Date.UTC(2026, 9, 2);
+
+function daysAgo(days: number): Date {
+  return new Date(NOW - days * 24 * 60 * 60 * 1000);
+}
 
 function placement(workspaceId: string): SidebarWorkspacePlacement {
   return {
@@ -33,10 +40,22 @@ describe("splitLimitedGroup", () => {
     expect(splitLimitedGroup(items, { limit: 10 })).toEqual({ visible: items, overflow: [] });
   });
 
+  it("moves hidden items behind the toggle and fills the limit with the next ones", () => {
+    const hidden = new Set(["a", "c"]);
+    expect(splitLimitedGroup(items, { limit: 3, isHidden: (item) => hidden.has(item) })).toEqual({
+      visible: ["b", "d", "e"],
+      overflow: ["a", "c", "f"],
+    });
+  });
+
   it("shows pinned-visible items past the limit, in their place, without spending it", () => {
-    expect(splitLimitedGroup(items, { limit: 2, isPinnedVisible: (item) => item === "f" })).toEqual(
-      { visible: ["a", "b", "f"], overflow: ["c", "d", "e"] },
-    );
+    expect(
+      splitLimitedGroup(items, {
+        limit: 2,
+        isHidden: (item) => item === "f",
+        isPinnedVisible: (item) => item === "f",
+      }),
+    ).toEqual({ visible: ["a", "b", "f"], overflow: ["c", "d", "e"] });
   });
 });
 
@@ -58,19 +77,91 @@ describe("revealMore", () => {
     });
     expect(revealMore({ items, split, revealed: 30 })).toEqual({ visible: items, remaining: 0 });
   });
+
+  it("puts revealed hidden items back in their place", () => {
+    const group = items.slice(0, 8);
+    const hidden = new Set(["w1", "w2"]);
+    const hiddenSplit = splitLimitedGroup(group, {
+      limit: 3,
+      isHidden: (item) => hidden.has(item),
+    });
+    expect(revealMore({ items: group, split: hiddenSplit, revealed: 2 })).toEqual({
+      visible: ["w0", "w1", "w2", "w3", "w4"],
+      remaining: 3,
+    });
+  });
+});
+
+describe("isStaleWorkspace", () => {
+  it("hides a finished workspace older than the cutoff", () => {
+    expect(
+      isStaleWorkspace({
+        entry: { statusBucket: "done", statusEnteredAt: daysAgo(15) },
+        days: 14,
+        now: NOW,
+      }),
+    ).toBe(true);
+  });
+
+  it("keeps a recently finished workspace", () => {
+    expect(
+      isStaleWorkspace({
+        entry: { statusBucket: "done", statusEnteredAt: daysAgo(2) },
+        days: 14,
+        now: NOW,
+      }),
+    ).toBe(false);
+  });
+
+  it("never hides work that is not finished and read", () => {
+    for (const statusBucket of ["running", "needs_input", "failed", "attention"] as const) {
+      expect(
+        isStaleWorkspace({
+          entry: { statusBucket, statusEnteredAt: daysAgo(400) },
+          days: 14,
+          now: NOW,
+        }),
+      ).toBe(false);
+    }
+  });
+
+  it("hides nothing at 0 days or without a date", () => {
+    expect(
+      isStaleWorkspace({
+        entry: { statusBucket: "done", statusEnteredAt: daysAgo(400) },
+        days: 0,
+        now: NOW,
+      }),
+    ).toBe(false);
+    expect(
+      isStaleWorkspace({
+        entry: { statusBucket: "done", statusEnteredAt: null },
+        days: 14,
+        now: NOW,
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("projectWorkspaceGroupOptions", () => {
-  it("keeps the selected workspace on screen past the limit", () => {
-    const workspaces = ["a", "b", "c", "d", "e", "f"].map(placement);
+  const workspaces = ["a", "b", "c", "d", "e", "f"].map(placement);
+  const entriesByKey = new Map([
+    ["server:a", { statusBucket: "done" as const, statusEnteredAt: daysAgo(30) }],
+    ["server:b", { statusBucket: "running" as const, statusEnteredAt: daysAgo(30) }],
+  ]);
+
+  it("hides stale workspaces and keeps the selected one on screen", () => {
     const options = projectWorkspaceGroupOptions({
       limit: 3,
+      hideInactiveDays: 14,
+      entriesByKey,
       selection: { serverId: "server", workspaceId: "f" },
+      now: NOW,
     });
     expect(splitLimitedGroup(workspaces, options).visible.map((w) => w.workspaceId)).toEqual([
-      "a",
       "b",
       "c",
+      "d",
       "f",
     ]);
   });
