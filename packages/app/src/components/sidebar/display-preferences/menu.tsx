@@ -22,6 +22,7 @@ import {
   GitBranch,
   GitPullRequest,
   Globe,
+  History,
   ListFilter,
   Rows3,
   Rows4,
@@ -58,7 +59,7 @@ import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
-import { SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
+import { SIDEBAR_HIDE_INACTIVE_DAYS, SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -132,6 +133,7 @@ const DENSITY_ICONS: Record<SidebarDensity, OptionIcon> = {
 };
 
 const WORKSPACE_LIMIT_ICON: OptionIcon = withUnistyles(ListFilter);
+const HIDE_INACTIVE_ICON: OptionIcon = withUnistyles(History);
 
 const GROUPING_MODES: readonly SidebarGroupMode[] = ["project", "status"];
 const TITLE_SOURCES: readonly WorkspaceTitleSource[] = ["title", "branch"];
@@ -275,20 +277,36 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     ];
 
     if (showProjectLimit) {
-      definitions.push({
-        id: "workspaceLimit",
-        title: t("sidebar.display.workspaceLimit.label"),
-        content: (
-          <CountOptionList
-            values={SIDEBAR_WORKSPACE_LIMITS}
-            icon={WORKSPACE_LIMIT_ICON}
-            labelKeys={WORKSPACE_LIMIT_LABEL_KEYS}
-            selectedValue={preferences.workspaceLimit}
-            onSelect={preferences.setWorkspaceLimit}
-            testIDPrefix="sidebar-workspace-limit"
-          />
-        ),
-      });
+      definitions.push(
+        {
+          id: "workspaceLimit",
+          title: t("sidebar.display.workspaceLimit.label"),
+          content: (
+            <CountOptionList
+              values={SIDEBAR_WORKSPACE_LIMITS}
+              icon={WORKSPACE_LIMIT_ICON}
+              labelKeys={WORKSPACE_LIMIT_LABEL_KEYS}
+              selectedValue={preferences.workspaceLimit}
+              onSelect={preferences.setWorkspaceLimit}
+              testIDPrefix="sidebar-workspace-limit"
+            />
+          ),
+        },
+        {
+          id: "hideInactive",
+          title: t("sidebar.display.hideInactive.label"),
+          content: (
+            <CountOptionList
+              values={SIDEBAR_HIDE_INACTIVE_DAYS}
+              icon={HIDE_INACTIVE_ICON}
+              labelKeys={HIDE_INACTIVE_LABEL_KEYS}
+              selectedValue={preferences.hideInactiveDays}
+              onSelect={preferences.setHideInactiveDays}
+              testIDPrefix="sidebar-hide-inactive"
+            />
+          ),
+        },
+      );
     }
     if (showHostFilter) {
       definitions.push({
@@ -385,6 +403,13 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
                 testID="sidebar-display-workspace-limit"
               >
                 {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+              <MenuSubTrigger
+                id="hideInactive"
+                value={countLabel(t, preferences.hideInactiveDays, HIDE_INACTIVE_VALUE_KEYS)}
+                testID="sidebar-display-hide-inactive"
+              >
+                {t("sidebar.display.hideInactive.label")}
               </MenuSubTrigger>
             </>
           ) : null}
@@ -609,16 +634,26 @@ function OptionList<Value extends string>({
   ));
 }
 
-/** A count's label key; the number is interpolated as `count`. */
+/** A count's label, with its own wording for 0 when 0 means "off" rather than a number. */
 interface CountLabelKeys {
   count: string;
+  zero?: string;
 }
 
 const WORKSPACE_LIMIT_LABEL_KEYS: CountLabelKeys = {
   count: "sidebar.display.workspaceLimit.option",
 };
+const HIDE_INACTIVE_LABEL_KEYS: CountLabelKeys = {
+  count: "sidebar.display.hideInactive.option",
+  zero: "sidebar.display.hideInactive.never",
+};
+const HIDE_INACTIVE_VALUE_KEYS: CountLabelKeys = {
+  count: "sidebar.display.hideInactive.value",
+  zero: "sidebar.display.hideInactive.never",
+};
 
 function countLabel(t: TFunction, value: number, keys: CountLabelKeys): string {
+  if (value === 0 && keys.zero) return t(keys.zero);
   return t(keys.count, { count: value });
 }
 

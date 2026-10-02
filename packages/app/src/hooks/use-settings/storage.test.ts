@@ -748,6 +748,22 @@ describe("appearance settings", () => {
     expect((await loadAppSettingsFromStorage(unknown)).sidebarWorkspaceLimit).toBe(5);
   });
 
+  it("restores the stored inactive-workspace cutoff and falls back to fourteen days", async () => {
+    const stored = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarHideInactiveDays: 0 }),
+      }),
+    });
+    const unknown = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarHideInactiveDays: 2 }),
+      }),
+    });
+
+    expect((await loadAppSettingsFromStorage(stored)).sidebarHideInactiveDays).toBe(0);
+    expect((await loadAppSettingsFromStorage(unknown)).sidebarHideInactiveDays).toBe(14);
+  });
+
   it("restores the stored sidebar density and falls back to comfortable", async () => {
     const stored = makeDeps({
       storage: createInMemoryKeyValueStorage({

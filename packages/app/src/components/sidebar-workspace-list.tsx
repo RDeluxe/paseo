@@ -1607,16 +1607,19 @@ function ProjectBlock({
   supportsPinningByServerId: ReadonlyMap<string, boolean>;
   onToggleWorkspacePin: ToggleSidebarWorkspacePin;
 }) {
-  const { workspaceLimit } = useSidebarProjectLimit();
+  const { workspaceLimit, hideInactiveDays } = useSidebarProjectLimit();
   const workspaceGroupOptions = useMemo(
     () => ({
       ...projectWorkspaceGroupOptions({
         limit: workspaceLimit,
+        hideInactiveDays,
+        entriesByKey: workspaceEntriesByKey,
         selection: activeWorkspaceSelection,
+        now: Date.now(),
       }),
       pageSize: SIDEBAR_MORE_PAGE_SIZE,
     }),
-    [workspaceLimit, activeWorkspaceSelection],
+    [workspaceLimit, hideInactiveDays, workspaceEntriesByKey, activeWorkspaceSelection],
   );
   const {
     visibleItems: visibleWorkspaces,
