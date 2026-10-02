@@ -89,6 +89,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/collapse-all`.
 - **Règle d'abandon :** si upstream ajoute un « collapse all », prendre le leur.
 
+### Densité semi-compacte
+
+- **Objectif :** garder tout ce que dit une ligne confortable (branche, PR, checks, labels), mais dans beaucoup moins de place, pour qui veut la densité sans perdre l'information. Écart voulu à trois règles d'upstream : `docs/design.md` §7 (des lignes plus serrées, comme le compact) ; le commentaire de `ChecksItem` (`sidebar/workspace-meta-row/index.tsx`), « A tick on its own has no subject », qui fait de « icône et texte » le défaut des checks ; et `docs/glossary.md` (Host badge), « that host's own display mode decides how it draws ». Les deux derniers cèdent à la place gagnée : la ligne d'infos raccourcie n'a plus la place des mots.
+- **Comportement :** troisième choix de « Density », entre confortable et compact. Les lignes prennent la géométrie serrée du compact et gardent la ligne d'infos, en plus courte : l'hôte devient une icône seule au bout du titre, la PR n'affiche que son numéro (l'icône et sa couleur disent ouverte, fusionnée ou fermée), les checks se réduisent à leur icône, et les séparateurs `·` disparaissent. Comme en compact, un projet vide se réduit à sa ligne. Les réglages ne changent pas pour autant : le sous-menu Checks et le mode d'affichage de l'hôte gardent ce que l'on a choisi, et le retrouvent en densité confortable. L'avatar du projet garde sa taille.
+- **Où :** la ligne `semiCompact` de `SIDEBAR_DENSITY_LAYOUTS` (`display-preferences/density.ts`) ; `condensed` dans `useSidebarMetaPreferences` (`display-preferences/model.ts`), lu par `WorkspaceMetaRow` (`sidebar/workspace-meta-row/index.tsx`) ; `SidebarWorkspaceRowContent` pour l'hôte.
+- **Preuve :** `e2e/browser/sidebar-density.spec.ts`, `e2e/browser/host-appearance.spec.ts`, `hooks/use-settings/storage.test.ts`.
+- **Commit d'origine :** `feature/semi-compact-density`.
+- **Règle d'abandon :** si upstream ajoute une densité intermédiaire, prendre la leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |

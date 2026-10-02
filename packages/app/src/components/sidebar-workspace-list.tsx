@@ -1812,7 +1812,7 @@ function ProjectBlock({
         </>
       );
     } else if (rowModel.trailingAction.kind === "new_workspace" && emptyProjectPlaceholder) {
-      // Compact keeps an empty project to its header row; the header's own "+" still creates one.
+      // The tight densities keep an empty project to its header row; its "+" still creates one.
       projectChildren = (
         <NewWorkspaceGhostRow
           project={project}
