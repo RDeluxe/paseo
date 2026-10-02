@@ -1156,6 +1156,7 @@ export const zhCN: TranslationResources = {
       density: {
         label: "密度",
         comfortable: "宽松",
+        semiCompact: "较紧凑",
         compact: "紧凑",
       },
       workspaceLimit: {
