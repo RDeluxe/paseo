@@ -1103,6 +1103,8 @@ export const ar: TranslationResources = {
         option: "بعد {{count}} يوم",
         value: "{{count}} ي",
       },
+      collapseAll: "طي الكل",
+      expandAll: "توسيع الكل",
       grouping: {
         label: "التجميع",
         project: "المشروع",

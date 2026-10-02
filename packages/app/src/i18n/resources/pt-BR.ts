@@ -1129,6 +1129,8 @@ export const ptBR: TranslationResources = {
         option: "Após {{count}} dias",
         value: "{{count}} d",
       },
+      collapseAll: "Recolher tudo",
+      expandAll: "Expandir tudo",
       grouping: {
         label: "Agrupamento",
         project: "Projeto",
