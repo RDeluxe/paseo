@@ -1213,6 +1213,11 @@ export const fr: TranslationResources = {
         status: "Statut",
         labels: "Libellés",
       },
+      projectIcon: {
+        label: "Icône de projet",
+        avatar: "Avatar",
+        folder: "Dossier",
+      },
       titleSource: {
         label: "Titre",
         title: "Titre",

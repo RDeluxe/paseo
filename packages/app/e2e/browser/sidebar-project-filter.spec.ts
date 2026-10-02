@@ -33,6 +33,7 @@ test.describe("Sidebar project filter", () => {
       await expect(page.getByRole("menuitem")).toHaveText([
         /^Grouping/,
         /^Title/,
+        /^Project icon/,
         "Show",
         /^Density/,
         /^Per project/,

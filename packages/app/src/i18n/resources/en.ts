@@ -1193,6 +1193,11 @@ export const en = {
         status: "Status",
         labels: "Labels",
       },
+      projectIcon: {
+        label: "Project icon",
+        avatar: "Avatar",
+        folder: "Folder",
+      },
       titleSource: {
         label: "Title",
         title: "Title",
