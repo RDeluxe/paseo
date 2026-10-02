@@ -2,7 +2,10 @@ import { memo, useMemo, useCallback, useState, type ReactNode } from "react";
 import { Text, View, type ViewStyle } from "react-native";
 import { StyleSheet, withUnistyles } from "react-native-unistyles";
 import { CircleAlert, Folder, FolderGit2, Monitor } from "lucide-react-native";
-import { ProjectStatusIndicator } from "@/components/sidebar/project-leading-visual";
+import {
+  ProjectStatusIndicator,
+  type ProjectMark,
+} from "@/components/sidebar/project-leading-visual";
 import type { SidebarSurfaceBackdrop } from "@/styles/surface-backdrop";
 import {
   WorkspaceMetaRow,
@@ -39,6 +42,10 @@ const needsInputColorMapping = (theme: Theme) => ({
 });
 
 const ThemedCircleAlert = withUnistyles(CircleAlert);
+
+// A workspace row hoisted out of its project names that project, so it keeps the avatar even when
+// project rows lead with a folder.
+const AVATAR_MARK: ProjectMark = { kind: "avatar" };
 const ThemedMonitor = withUnistyles(Monitor);
 const ThemedFolder = withUnistyles(Folder);
 const ThemedFolderGit2 = withUnistyles(FolderGit2);
@@ -156,6 +163,7 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             statusBucket={workspace.statusBucket}
             backdrop={backdrop}
             iconSize={projectIconSize}
+            mark={AVATAR_MARK}
             loading={isLoading}
             testID={`sidebar-row-project-icon-${workspace.workspaceKey}`}
           />

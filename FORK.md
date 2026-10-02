@@ -98,6 +98,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/semi-compact-density`.
 - **Règle d'abandon :** si upstream ajoute une densité intermédiaire, prendre la leur.
 
+### Dossiers à la place des avatars de projet
+
+- **Objectif :** retrouver la lecture de Cursor, où l'icône d'un projet dit s'il est ouvert, pour qui préfère cela à l'avatar. Indépendant de la densité.
+- **Comportement :** « Project icon » à la racine du menu : Avatar (par défaut, celui d'upstream) ou Folder. En Folder, chaque ligne de projet commence par un dossier ouvert quand le projet est déplié, fermé quand il est replié, à la taille de la densité ; le point de statut d'un projet replié reste au coin. Le dossier ne s'échange pas contre le chevron au survol. Les workspaces affichés hors de leur projet (regroupement par statut) gardent l'avatar, qui y nomme le projet.
+- **Où :** `display-preferences/project-icon.ts` ; le réglage `sidebarProjectIcon` ; `ProjectMark` et `ProjectFolder` dans `sidebar/project-leading-visual.tsx` ; `ProjectHeaderRow` dans `sidebar-workspace-list.tsx`.
+- **Preuve :** `e2e/browser/sidebar-project-icon.spec.ts`, `hooks/use-settings/storage.test.ts`.
+- **Commit d'origine :** `feature/folder-project-icons`.
+- **Règle d'abandon :** si upstream propose des dossiers à la place des avatars, prendre les leurs.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |

@@ -160,6 +160,7 @@ import type { HostBadgeModel } from "@/hosts/appearance";
 import { useHostBadges } from "@/hosts/use-host-badges";
 import {
   useSidebarDensityLayout,
+  useSidebarProjectIcon,
   useSidebarProjectLimit,
   useSidebarRowItems,
 } from "@/components/sidebar/display-preferences/model";
@@ -946,6 +947,7 @@ function ProjectHeaderRow({
   }, [interaction]);
 
   const { tightRows, projectIconSize } = useSidebarDensityLayout();
+  const projectIconStyle = useSidebarProjectIcon();
   const projectRowStyle = useCallback(
     ({ pressed }: PressableStateCallbackType) => [
       styles.projectRow,
@@ -968,6 +970,7 @@ function ProjectHeaderRow({
           projectViewKey={project.viewKey}
           backdrop={getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered })}
           iconSize={projectIconSize}
+          iconStyle={projectIconStyle}
           chevron={chevron}
           showChevron={isHovered && chevron !== null}
           isArchiving={isArchiving}
