@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { hasVisibleOrderChanged, mergeWithRemainder } from "./sidebar-reorder";
+import {
+  hasVisibleOrderChanged,
+  mergeIntoVisibleSlots,
+  mergeWithRemainder,
+} from "./sidebar-reorder";
 
 describe("hasVisibleOrderChanged", () => {
   it("returns false when visible order is unchanged", () => {
@@ -48,5 +52,25 @@ describe("mergeWithRemainder", () => {
         reorderedVisibleKeys: [],
       }),
     ).toEqual(["stale", "hidden"]);
+  });
+});
+
+describe("mergeIntoVisibleSlots", () => {
+  it("keeps hidden keys in place and reorders the visible ones among their own slots", () => {
+    expect(
+      mergeIntoVisibleSlots({
+        currentOrder: ["a", "b", "stale", "c", "d", "selected"],
+        reorderedVisibleKeys: ["b", "a", "c", "selected"],
+      }),
+    ).toEqual(["b", "a", "stale", "c", "d", "selected"]);
+  });
+
+  it("puts visible keys the stored order does not know yet first", () => {
+    expect(
+      mergeIntoVisibleSlots({
+        currentOrder: ["a", "hidden", "b"],
+        reorderedVisibleKeys: ["new", "b", "a"],
+      }),
+    ).toEqual(["new", "b", "hidden", "a"]);
   });
 });

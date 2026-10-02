@@ -56,6 +56,7 @@ import { workspaceLabelKey, type WorkspaceLabelColor } from "@getpaseo/protocol/
 import type { WorkspaceTitleSource } from "@/hooks/use-settings";
 import { SIDEBAR_CHECKS_DISPLAYS, type SidebarChecksDisplay } from "./checks-display";
 import { SIDEBAR_DENSITIES, type SidebarDensity } from "./density";
+import { SIDEBAR_WORKSPACE_LIMITS } from "./project-limit";
 import { useSidebarDisplayPreferences, type SidebarTrailingChoice } from "./model";
 import { SIDEBAR_ROW_ITEMS, type SidebarRowItem } from "./row-items";
 import { useWorkspaceLabelProjection } from "@/workspace-labels";
@@ -201,6 +202,12 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
   // catalog only counts hosts that are online, so a host dropping off would otherwise take away
   // the only way back to a filter that is still hiding workspaces.
   const showLabelFilter = labels.length > 0 || hasActiveSidebarLabelFilter(preferences.labelFilter);
+  // The limits act on project blocks; the status groups list every workspace they hold.
+  const showProjectLimit = preferences.grouping === "project";
+  const formatWorkspaceLimit = useCallback(
+    (count: number) => t("sidebar.display.workspaceLimit.option", { count }),
+    [t],
+  );
 
   const pages = useMemo<MenuPageDefinition[]>(() => {
     const definitions: MenuPageDefinition[] = [
@@ -277,6 +284,21 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
       });
     }
 
+    if (showProjectLimit) {
+      definitions.push({
+        id: "workspaceLimit",
+        title: t("sidebar.display.workspaceLimit.label"),
+        content: (
+          <OptionList
+            values={SIDEBAR_WORKSPACE_LIMITS}
+            formatLabel={formatWorkspaceLimit}
+            selectedValue={preferences.workspaceLimit}
+            onSelect={preferences.setWorkspaceLimit}
+            testIDPrefix="sidebar-workspace-limit"
+          />
+        ),
+      });
+    }
     if (showHostFilter) {
       definitions.push({
         id: "hostFilter",
@@ -312,6 +334,8 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
     preferences,
     workspaceSortSupported,
     hosts,
+    showProjectLimit,
+    formatWorkspaceLimit,
     showHostFilter,
     showProjectFilter,
     allProjects,
@@ -375,6 +399,18 @@ export function SidebarDisplayPreferencesMenu(): ReactElement {
           >
             {t("sidebar.display.density.label")}
           </MenuSubTrigger>
+          {showProjectLimit ? (
+            <>
+              <MenuSeparator />
+              <MenuSubTrigger
+                id="workspaceLimit"
+                value={String(preferences.workspaceLimit)}
+                testID="sidebar-display-workspace-limit"
+              >
+                {t("sidebar.display.workspaceLimit.label")}
+              </MenuSubTrigger>
+            </>
+          ) : null}
           {showHostFilter ? (
             <>
               <MenuSeparator />
@@ -575,7 +611,7 @@ function LabelFilterItem({
 type Preferences = ReturnType<typeof useSidebarDisplayPreferences>;
 
 /** One option row: its mark on the left, its label, and a check when it is the chosen one. */
-function OptionItem<Value extends string>({
+function OptionItem<Value extends string | number>({
   value,
   icon: Icon,
   label,
@@ -585,7 +621,8 @@ function OptionItem<Value extends string>({
   testID,
 }: {
   value: Value;
-  icon: OptionIcon;
+  /** Without one, the check takes the leading column, so labels stay aligned ticked or not. */
+  icon?: OptionIcon;
   label: string;
   selected: boolean;
   closeOnSelect?: boolean;
@@ -594,13 +631,14 @@ function OptionItem<Value extends string>({
 }): ReactElement {
   const handleSelect = useCallback(() => onSelect(value), [onSelect, value]);
   const leading = useMemo(
-    () => <Icon size={OPTION_ICON_SIZE} uniProps={mutedIconMapping} />,
+    () => (Icon ? <Icon size={OPTION_ICON_SIZE} uniProps={mutedIconMapping} /> : null),
     [Icon],
   );
   return (
     <MenuItem
       selected={selected}
       leading={leading}
+      showSelectedCheck={!Icon}
       closeOnSelect={closeOnSelect}
       onSelect={handleSelect}
       testID={testID}
@@ -610,29 +648,34 @@ function OptionItem<Value extends string>({
   );
 }
 
+/**
+ * Each option names itself through a label key, or, when the value is the label — a count —
+ * through `formatLabel`. A count has no icon of its own to give it.
+ */
+type OptionListLabels<Value extends string | number> =
+  | { icons: Record<Value, OptionIcon>; labelKeys: Record<Value, string> }
+  | { formatLabel: (value: Value) => string };
+
 /** A page of mutually exclusive options — pick one and the menu closes. */
-function OptionList<Value extends string>({
+function OptionList<Value extends string | number>({
   values,
-  icons,
-  labelKeys,
   selectedValue,
   onSelect,
   testIDPrefix,
+  ...labels
 }: {
   values: readonly Value[];
-  icons: Record<Value, OptionIcon>;
-  labelKeys: Record<Value, string>;
   selectedValue: Value;
   onSelect: (value: Value) => void;
   testIDPrefix: string;
-}): ReactNode {
+} & OptionListLabels<Value>): ReactNode {
   const { t } = useTranslation();
   return values.map((value) => (
     <OptionItem
       key={value}
       value={value}
-      icon={icons[value]}
-      label={t(labelKeys[value])}
+      icon={"icons" in labels ? labels.icons[value] : undefined}
+      label={"labelKeys" in labels ? t(labels.labelKeys[value]) : labels.formatLabel(value)}
       selected={value === selectedValue}
       onSelect={onSelect}
       testID={`${testIDPrefix}-${value}`}

@@ -229,7 +229,7 @@ async function expectWorkspaceOrder(rows: Locator, ids: string[]) {
     .toEqual(ids.map((id) => `sidebar-workspace-row-${getServerId()}:${id}`));
 }
 
-async function revealWorkspaces(list: Locator, action: "Show more" | "Show less") {
+async function revealWorkspaces(list: Locator, action: "More" | "Show more" | "Show less") {
   await list.getByLabel(action, { exact: true }).click();
 }
 
@@ -252,14 +252,14 @@ function compactProjectRows(page: Page, seed: CompactProject["seed"]) {
 
 async function expectActiveOverflowTransitions(page: Page, { seed, ids, agent }: CompactProject) {
   const { rows } = compactProjectRows(page, seed);
-  await expectWorkspaceOrder(rows, ids.slice(0, 7));
+  await expectWorkspaceOrder(rows, ids.slice(0, 5));
 
   await seed.client.sendAgentMessage(agent.id, "show active overflow");
-  await expectWorkspaceOrder(rows, [...ids.slice(0, 7), ids[11]]);
+  await expectWorkspaceOrder(rows, [...ids.slice(0, 5), ids[11]]);
   await seed.client.waitForFinish(agent.id, 15_000);
-  await expectWorkspaceOrder(rows, [...ids.slice(0, 7), ids[11]]);
+  await expectWorkspaceOrder(rows, [...ids.slice(0, 5), ids[11]]);
   await seed.client.clearWorkspaceAttention(seed.workspaceId);
-  await expectWorkspaceOrder(rows, ids.slice(0, 7));
+  await expectWorkspaceOrder(rows, ids.slice(0, 5));
 }
 
 async function expectRevealSurvivesSortingAndCollapse(
@@ -268,7 +268,8 @@ async function expectRevealSurvivesSortingAndCollapse(
 ) {
   const { rows, group, project } = compactProjectRows(page, seed);
   const retainedRows = await rows.elementHandles();
-  await revealWorkspaces(group, "Show more");
+  // A project's "More" reveals ten rows per press and never folds back.
+  await revealWorkspaces(group, "More");
   await expectWorkspaceOrder(rows, ids);
   for (const [index, retained] of retainedRows.entries()) {
     expect(
@@ -285,14 +286,8 @@ async function expectRevealSurvivesSortingAndCollapse(
   await expectWorkspaceOrder(rows, ids);
   await selectWorkspaceSort(page, "Last prompt");
   await expectWorkspaceOrder(rows, [ids[11], ...ids.slice(0, 11)]);
-  const revealedRow = await rows.nth(8).elementHandle();
-  await revealWorkspaces(group, "Show less");
-  await expectWorkspaceOrder(rows, [ids[11], ...ids.slice(0, 6)]);
   await selectWorkspaceSort(page, "Created");
-  await expectWorkspaceOrder(rows, ids.slice(0, 7));
-  expect(await revealedRow!.evaluate((row) => row.isConnected)).toBe(false);
-  await reconnectSidebar(page);
-  await expectWorkspaceOrder(rows, ids.slice(0, 7));
+  await expectWorkspaceOrder(rows, ids);
 }
 
 async function expectStatusBucketsRetainActiveOverflow(
@@ -341,7 +336,7 @@ async function expectStatusBucketsRetainActiveOverflow(
   for (const workspaceId of ids.slice(0, 8)) await seed.client.clearWorkspaceAttention(workspaceId);
   await expect(doneRows).toHaveCount(7);
   await selectProjectGrouping(page);
-  await expectWorkspaceOrder(rows, ids.slice(0, 7));
+  await expectWorkspaceOrder(rows, ids.slice(0, 5));
 }
 
 test("compact groups retain active overflow and reveal the current ordered rows", async ({

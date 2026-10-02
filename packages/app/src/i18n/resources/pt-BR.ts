@@ -1204,6 +1204,10 @@ export const ptBR: TranslationResources = {
         comfortable: "Confortável",
         compact: "Compacta",
       },
+      workspaceLimit: {
+        label: "Por projeto",
+        option: "{{count}} workspaces",
+      },
       grouping: {
         label: "Agrupamento",
         project: "Projeto",
@@ -1333,6 +1337,7 @@ export const ptBR: TranslationResources = {
         newWorkspace: "Novo workspace",
         showMore: "Mostrar mais",
         showLess: "Mostrar menos",
+        more: "Mais",
         createWorkspaceFor: "Criar um novo workspace para {{projectName}}",
         copyPath: "Copiar caminho",
         copyBranchName: "Copiar nome da branch",
