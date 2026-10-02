@@ -1215,6 +1215,7 @@ export const es: TranslationResources = {
       density: {
         label: "Densidad",
         comfortable: "Cómoda",
+        semiCompact: "Semicompacta",
         compact: "Compacta",
       },
       workspaceLimit: {

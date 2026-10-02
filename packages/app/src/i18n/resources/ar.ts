@@ -1179,6 +1179,7 @@ export const ar: TranslationResources = {
       density: {
         label: "الكثافة",
         comfortable: "مريحة",
+        semiCompact: "شبه مضغوطة",
         compact: "مضغوطة",
       },
       workspaceLimit: {

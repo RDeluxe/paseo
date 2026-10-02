@@ -1196,6 +1196,7 @@ export const ru: TranslationResources = {
       density: {
         label: "Плотность",
         comfortable: "Свободная",
+        semiCompact: "Полукомпактная",
         compact: "Компактная",
       },
       workspaceLimit: {

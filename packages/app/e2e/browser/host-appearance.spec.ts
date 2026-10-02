@@ -164,3 +164,16 @@ test("compact rows show the host as a bare glyph on the title line", async ({
   await expectHostBadgeIconOnly(page, badge);
   await expectHostBadgeCenteredOnTitle(page, { ...badge, title: "Secondary workspace" });
 });
+
+test("semi-compact rows show the host as a bare glyph too", async ({ page, twoHostSidebar }) => {
+  const badge = {
+    serverId: twoHostSidebar.secondaryServerId,
+    workspaceId: twoHostSidebar.secondaryWorkspaceId,
+    hostName: SECONDARY_HOST_LABEL,
+  };
+
+  await selectSidebarDensity(page, "semiCompact");
+
+  await expectHostBadgeIconOnly(page, badge);
+  await expectHostBadgeCenteredOnTitle(page, { ...badge, title: "Secondary workspace" });
+});
