@@ -1184,6 +1184,7 @@ export const en = {
       density: {
         label: "Density",
         comfortable: "Comfortable",
+        semiCompact: "Semi-compact",
         compact: "Compact",
       },
       workspaceLimit: {

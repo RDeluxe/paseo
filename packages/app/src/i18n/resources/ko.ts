@@ -1183,6 +1183,7 @@ export const ko: TranslationResources = {
       density: {
         label: "밀도",
         comfortable: "여유 있게",
+        semiCompact: "약간 촘촘하게",
         compact: "촘촘하게",
       },
       workspaceLimit: {
