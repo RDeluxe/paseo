@@ -1218,6 +1218,12 @@ export const es: TranslationResources = {
         label: "Por proyecto",
         option: "{{count}} espacios de trabajo",
       },
+      hideInactive: {
+        label: "Ocultar inactivos",
+        never: "Nunca",
+        option: "Después de {{count}} días",
+        value: "{{count}} d",
+      },
       grouping: {
         label: "Agrupación",
         project: "Proyecto",
