@@ -21,6 +21,7 @@ import {
 } from "../support/helpers/isolated-host-daemon";
 import { seedWorkspace, type SeededWorkspace } from "../support/helpers/seed-client";
 import { getServerId } from "../support/helpers/server-id";
+import { selectSidebarDensity } from "../support/helpers/sidebar";
 import { waitForSidebarHydration } from "../support/helpers/workspace-ui";
 
 const PRIMARY_HOST_LABEL = "Primary Host";
@@ -144,4 +145,20 @@ test("customizes a host badge and preserves its appearance after reload", async 
       hostName: PRIMARY_HOST_LABEL,
     });
   });
+});
+
+test("compact rows show the host as a bare glyph on the title line", async ({
+  page,
+  twoHostSidebar,
+}) => {
+  const badge = {
+    serverId: twoHostSidebar.secondaryServerId,
+    workspaceId: twoHostSidebar.secondaryWorkspaceId,
+    hostName: SECONDARY_HOST_LABEL,
+  };
+  await expectHostBadgeName(page, badge);
+
+  await selectSidebarDensity(page, "compact");
+
+  await expectHostBadgeIconOnly(page, badge);
 });

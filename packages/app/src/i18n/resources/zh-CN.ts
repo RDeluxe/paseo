@@ -1080,6 +1080,11 @@ export const zhCN: TranslationResources = {
     display: {
       trigger: "显示偏好",
       heading: "显示",
+      density: {
+        label: "密度",
+        comfortable: "宽松",
+        compact: "紧凑",
+      },
       grouping: {
         label: "分组",
         project: "项目",

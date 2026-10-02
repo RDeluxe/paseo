@@ -1088,6 +1088,11 @@ export const ar: TranslationResources = {
     display: {
       trigger: "تفضيلات العرض",
       heading: "العرض",
+      density: {
+        label: "الكثافة",
+        comfortable: "مريحة",
+        compact: "مضغوطة",
+      },
       grouping: {
         label: "التجميع",
         project: "المشروع",
