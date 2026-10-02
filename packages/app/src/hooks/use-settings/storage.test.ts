@@ -825,6 +825,22 @@ describe("appearance settings", () => {
     expect((await loadAppSettingsFromStorage(deps)).sidebarChecksDisplay).toBe("icon");
   });
 
+  it("restores the stored sidebar density and falls back to comfortable", async () => {
+    const stored = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarDensity: "compact" }),
+      }),
+    });
+    const unknown = makeDeps({
+      storage: createInMemoryKeyValueStorage({
+        [APP_SETTINGS_KEY]: JSON.stringify({ sidebarDensity: "tiny" }),
+      }),
+    });
+
+    expect((await loadAppSettingsFromStorage(stored)).sidebarDensity).toBe("compact");
+    expect((await loadAppSettingsFromStorage(unknown)).sidebarDensity).toBe("comfortable");
+  });
+
   it("uses a 15px mobile base and a 14px web base", () => {
     expect(defaultUiBaseFontSize(true)).toBe(15);
     expect(defaultUiBaseFontSize(false)).toBe(14);

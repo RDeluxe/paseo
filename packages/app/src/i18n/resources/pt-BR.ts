@@ -1175,6 +1175,11 @@ export const ptBR: TranslationResources = {
     display: {
       trigger: "Preferências de exibição",
       heading: "Exibição",
+      density: {
+        label: "Densidade",
+        comfortable: "Confortável",
+        compact: "Compacta",
+      },
       grouping: {
         label: "Agrupamento",
         project: "Projeto",

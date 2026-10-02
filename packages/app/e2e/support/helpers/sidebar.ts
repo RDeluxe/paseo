@@ -1,5 +1,6 @@
 import { expect, type Page } from "@playwright/test";
 import { getServerId } from "./server-id";
+import type { SidebarDensity } from "@/components/sidebar/display-preferences/density";
 
 interface ContextMenuAnchor {
   x: number;
@@ -229,6 +230,11 @@ export async function closeSidebarDisplayPreferences(page: Page): Promise<void> 
 export async function selectSidebarStatusGrouping(page: Page): Promise<void> {
   await openSidebarDisplayPage(page, "sidebar-display-grouping");
   await page.getByTestId("sidebar-grouping-status").click();
+}
+
+export async function selectSidebarDensity(page: Page, density: SidebarDensity): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-density");
+  await page.getByTestId(`sidebar-density-${density}`).click();
 }
 
 export async function openMobileAgentSidebar(page: Page): Promise<void> {
