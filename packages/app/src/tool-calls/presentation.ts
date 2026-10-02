@@ -69,7 +69,7 @@ export function buildToolCallPresentation(
 
   return {
     displayName: displayModel.displayName,
-    summary: displayModel.summary,
+    summary: shellDescription(input.detail) ?? displayModel.summary,
     errorText: displayModel.errorText,
     icon: input.resolveIcon(input.toolName, input.detail),
     isLoadingDetails,
@@ -79,6 +79,15 @@ export function buildToolCallPresentation(
     isPlan: input.detail?.type === "plan",
     planOutcome: input.detail?.type === "plan" ? resolvePlanOutcome(input) : undefined,
   };
+}
+
+/**
+ * A shell row reads as the agent's own sentence for the command when it gave one; the command
+ * stays in the expanded detail. Chosen here, not in the shared display model, because the daemon
+ * reads that model to tell other agents what ran, and they need the command itself.
+ */
+function shellDescription(detail: ToolCallDetail | undefined): string | undefined {
+  return detail?.type === "shell" ? detail.description : undefined;
 }
 
 function resolvePlanOutcome(input: BuildToolCallPresentationInput): PlanOutcome | undefined {

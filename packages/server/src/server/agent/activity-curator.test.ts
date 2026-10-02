@@ -82,6 +82,25 @@ describe("curateAgentActivity", () => {
     expect(result).toContain("[Shell] npm test");
   });
 
+  it("tells other agents the command a shell call ran, not its description", () => {
+    const timeline: AgentTimelineItem[] = [
+      toolCallItem({
+        callId: "shell-described",
+        name: "Bash",
+        detail: {
+          type: "shell",
+          command: "grep -rn freescout .",
+          description: "Find every Freescout mention",
+        },
+      }),
+    ];
+
+    const result = curateAgentActivity(timeline);
+
+    expect(result).toContain("[Shell] grep -rn freescout .");
+    expect(result).not.toContain("Find every Freescout mention");
+  });
+
   it("renders terminal tool calls as one-line command summaries", () => {
     const timeline: AgentTimelineItem[] = [
       toolCallItem({

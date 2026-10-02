@@ -1113,6 +1113,34 @@ describe("ACPAgentSession Zed parity", () => {
     );
   });
 
+  test("keeps the description an agent gives its shell command", () => {
+    const session = createSession();
+    const internals = asInternals<ACPSessionInternals>(session);
+
+    const events = internals.translateSessionUpdate({
+      sessionUpdate: "tool_call",
+      toolCallId: "tool-1",
+      title: "`grep -rn freescout .`",
+      kind: "execute",
+      status: "pending",
+      rawInput: { command: "grep -rn freescout .", description: "Find every Freescout mention" },
+    });
+
+    expect(events).toMatchObject([
+      {
+        type: "timeline",
+        item: {
+          type: "tool_call",
+          detail: {
+            type: "shell",
+            command: "grep -rn freescout .",
+            description: "Find every Freescout mention",
+          },
+        },
+      },
+    ]);
+  });
+
   test("routes config_option_update and refreshes derived mode, model, and thinking state", async () => {
     const session = createSession();
     const internals = asInternals<ACPSessionInternals>(session);
