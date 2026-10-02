@@ -1097,6 +1097,12 @@ export const ar: TranslationResources = {
         label: "لكل مشروع",
         option: "{{count}} مساحات عمل",
       },
+      hideInactive: {
+        label: "إخفاء غير النشطة",
+        never: "أبدًا",
+        option: "بعد {{count}} يوم",
+        value: "{{count}} ي",
+      },
       grouping: {
         label: "التجميع",
         project: "المشروع",

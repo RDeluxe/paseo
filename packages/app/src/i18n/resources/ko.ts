@@ -1104,6 +1104,12 @@ export const ko: TranslationResources = {
         label: "프로젝트당",
         option: "워크스페이스 {{count}}개",
       },
+      hideInactive: {
+        label: "비활성 숨기기",
+        never: "안 함",
+        option: "{{count}}일 후",
+        value: "{{count}}일",
+      },
       grouping: {
         label: "그룹화",
         project: "프로젝트",
