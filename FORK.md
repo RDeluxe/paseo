@@ -53,6 +53,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 
 **Fonction native, sans code :** la date de dernière activité à droite des lignes existe déjà dans upstream (Préférences d'affichage → Show → Last activity).
 
+### Densité compacte
+
+- **Objectif :** voir beaucoup de conversations d'un coup, comme dans la barre latérale de Cursor Agents. Écart voulu à deux règles d'upstream. `docs/design.md` §7 : « Compressing rows below the established density to fit more on the screen is wrong » ; upstream reste le défaut, mais avec des centaines de workspaces je veux pouvoir choisir la densité. `docs/glossary.md` (Host badge) : « that host's own display mode decides how it draws » ; sur une ligne unique, l'hôte n'a pas la place de son nom, il garde seulement son glyphe et sa couleur (s'il est masqué, il reste masqué).
+- **Comportement :** densité confortable (celle d'upstream) par défaut. En compact, chaque workspace tient sur une ligne, comme dans Cursor : les lignes font 24 à 28 px au lieu de 36, la ligne d'infos sous le titre disparaît, l'hôte d'un workspace distant devient une icône de serveur seule au bout de la ligne de titre, l'avatar du projet passe de 16 à 12 px, et un projet vide se réduit à sa ligne (son « + » suffit). Réglage : racine du menu, « Density ».
+- **Où :** la table `SIDEBAR_DENSITY_LAYOUTS` de `display-preferences/density.ts`, seul endroit qui dit ce que fait une densité, lue par `useSidebarDensityLayout` (`display-preferences/model.ts`) ; le réglage `sidebarDensity` ; le style `rowCompact` de `sidebar/sidebar-workspace-row-content.tsx`, appliqué par les trois lignes de workspace (`sidebar-workspace-list.tsx`, `sidebar/sidebar-workspace-row.tsx`, `sidebar/sidebar-status-list.tsx`) et par `sidebar/sidebar-group-toggle-row.tsx` ; `projectRowCompact` dans `sidebar-workspace-list.tsx` ; le badge d'hôte sur la ligne de titre, dans `SidebarWorkspaceRowContent`. Si upstream ajoute une variante de ligne de workspace, elle prend aussi `rowCompact`.
+- **Preuve :** `e2e/browser/sidebar-density.spec.ts`, le test « compact rows show the host as a bare glyph on the title line » de `e2e/browser/host-appearance.spec.ts`, `hooks/use-settings/storage.test.ts`.
+- **Commit d'origine :** `feature/compact-density`.
+- **Règle d'abandon :** si upstream ajoute une densité compacte, prendre la leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |

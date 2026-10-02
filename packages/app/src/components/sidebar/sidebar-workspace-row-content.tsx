@@ -10,6 +10,7 @@ import {
 } from "@/components/sidebar/workspace-meta-row";
 import { WorkspaceHoverCard } from "@/components/workspace-hover-card";
 import type { HostBadgeModel } from "@/hosts/appearance";
+import { HostBadge } from "@/hosts/host-badge";
 import type { SidebarWorkspaceEntry } from "@/hooks/use-sidebar-workspaces-list";
 import {
   hasSidebarWorkspaceTrailing,
@@ -17,6 +18,7 @@ import {
 } from "@/components/sidebar/workspace-trailing";
 import { useAppSettings } from "@/hooks/use-settings";
 import { densityIconBox } from "@/styles/density";
+import { useSidebarDensityLayout } from "@/components/sidebar/display-preferences/model";
 import type { Theme } from "@/styles/theme";
 import type { SidebarStateBucket } from "@/utils/sidebar-agent-state";
 import { getStatusDotColor } from "@/utils/status-dot-color";
@@ -124,6 +126,14 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
   // The workspace carries label names; their colors live in its host's catalog, so the row is
   // where the two meet — the meta line is handed finished definitions.
   const labels = useWorkspaceLabelDefinitions(workspace.serverId, workspace.labels);
+  // A density can move the host to the end of the title line as its bare glyph, next to the
+  // timestamp, so a row on another machine still says so. Whether a host shows at all stays the
+  // host's own setting: `hostBadge` is null when it is hidden.
+  const { metaRow, hostOnTitle, projectIconSize } = useSidebarDensityLayout();
+  const titleHostBadge = useMemo(
+    () => (hostOnTitle && hostBadge ? { ...hostBadge, showLabel: false } : null),
+    [hostOnTitle, hostBadge],
+  );
   const workspaceBranchTextStyle = useMemo(
     () => [
       styles.workspaceBranchText,
@@ -143,6 +153,7 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             projectViewKey={workspace.projectViewKey}
             statusBucket={workspace.statusBucket}
             backdrop={backdrop}
+            iconSize={projectIconSize}
             loading={isLoading}
             testID={`sidebar-row-project-icon-${workspace.workspaceKey}`}
           />
@@ -159,16 +170,25 @@ export const SidebarWorkspaceRowContent = memo(function SidebarWorkspaceRowConte
             <Text style={workspaceBranchTextStyle} numberOfLines={1}>
               {workspaceLabel}
             </Text>
-            <View style={sidebarWorkspaceRowStyles.rowRight}>{children}</View>
+            <View style={sidebarWorkspaceRowStyles.rowRight}>
+              {titleHostBadge ? (
+                <View style={styles.titleHostBadge}>
+                  <HostBadge badge={titleHostBadge} />
+                </View>
+              ) : null}
+              {children}
+            </View>
           </View>
-          <WorkspaceMetaRow
-            currentBranch={workspace.currentBranch}
-            projectName={leadingProjectName}
-            hostBadge={hostBadge ?? null}
-            prHint={workspace.prHint}
-            serviceSummary={serviceSummary}
-            labels={labels}
-          />
+          {metaRow === "none" ? null : (
+            <WorkspaceMetaRow
+              currentBranch={workspace.currentBranch}
+              projectName={leadingProjectName}
+              hostBadge={hostOnTitle ? null : (hostBadge ?? null)}
+              prHint={workspace.prHint}
+              serviceSummary={serviceSummary}
+              labels={labels}
+            />
+          )}
         </View>
       </View>
       {showShortcutBadge && shortcutNumber !== null ? (
@@ -283,6 +303,14 @@ export const sidebarWorkspaceRowStyles = StyleSheet.create((theme) => ({
   // pulls the highlight in with the content and the row stops lining up with its header.
   rowIndented: {
     paddingLeft: theme.spacing[2] + theme.spacing[2],
+  },
+  // The compact sidebar density's geometry, shared by every workspace row and the row that ends
+  // a group. Only the padding and the gaps go; the text keeps its size.
+  rowCompact: {
+    minHeight: 24,
+    paddingVertical: theme.spacing[0.5],
+    marginBottom: 0,
+    gap: theme.spacing[0.5],
   },
   rowRight: {
     flexDirection: "row",
@@ -475,6 +503,12 @@ const styles = StyleSheet.create((theme) => ({
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: theme.spacing[2],
+  },
+  // The glyph is shorter than the title line; centring it on that line keeps it level with the
+  // text, where the trailing slot's top alignment would lift it.
+  titleHostBadge: {
+    height: TITLE_LINE_HEIGHT,
+    justifyContent: "center",
   },
   shortcutBadgeOverlay: {
     position: "absolute",

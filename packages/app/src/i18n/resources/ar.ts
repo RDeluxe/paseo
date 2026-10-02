@@ -1161,6 +1161,11 @@ export const ar: TranslationResources = {
       showBackground: "إظهار مساحات العمل في الخلفية",
       trigger: "تفضيلات العرض",
       heading: "العرض",
+      density: {
+        label: "الكثافة",
+        comfortable: "مريحة",
+        compact: "مضغوطة",
+      },
       grouping: {
         label: "التجميع",
         project: "المشروع",

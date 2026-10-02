@@ -101,6 +101,7 @@ import { SidebarSectionHeader } from "@/components/sidebar/sidebar-section-heade
 import { SidebarGroupToggleRow } from "@/components/sidebar/sidebar-group-toggle-row";
 import { useLimitedSidebarGroup } from "@/components/sidebar/use-limited-sidebar-group";
 import {
+  sidebarWorkspaceRowStyles,
   SidebarWorkspaceRowFrame,
   SidebarWorkspaceRowContent,
   SidebarWorkspaceShortcutBadge,
@@ -151,7 +152,10 @@ import { OpenInFileManagerMenuItem } from "@/workspace/open-in-file-manager/menu
 import { useLocalDaemonServerId } from "@/hooks/use-is-local-daemon";
 import type { HostBadgeModel } from "@/hosts/appearance";
 import { useHostBadges } from "@/hosts/use-host-badges";
-import { useSidebarRowItems } from "@/components/sidebar/display-preferences/model";
+import {
+  useSidebarDensityLayout,
+  useSidebarRowItems,
+} from "@/components/sidebar/display-preferences/model";
 import { PullRequestStateIcon } from "@/git/pull-request-state-icon";
 
 const workspaceKeyExtractor = (workspace: SidebarWorkspacePlacement) => workspace.workspaceKey;
@@ -366,14 +370,17 @@ function getProjectWorkspaceRowStyle({
   isPressed,
   selected,
   isHovered,
+  tightRows,
 }: {
   isDragging: boolean;
   isPressed: boolean;
   selected: boolean;
   isHovered: boolean;
+  tightRows: boolean;
 }) {
   return [
     styles.workspaceRow,
+    tightRows && sidebarWorkspaceRowStyles.rowCompact,
     isHovered && styles.workspaceRowHovered,
     selected && styles.sidebarRowSelected,
     isDragging && styles.workspaceRowDragging,
@@ -932,15 +939,17 @@ function ProjectHeaderRow({
     interaction.handlePressOut();
   }, [interaction]);
 
+  const { tightRows, projectIconSize } = useSidebarDensityLayout();
   const projectRowStyle = useCallback(
     ({ pressed }: PressableStateCallbackType) => [
       styles.projectRow,
+      tightRows && styles.projectRowCompact,
       isDragging && styles.projectRowDragging,
       selected && styles.sidebarRowSelected,
       isHovered && styles.projectRowHovered,
       pressed && styles.projectRowPressed,
     ],
-    [isDragging, selected, isHovered],
+    [tightRows, isDragging, selected, isHovered],
   );
 
   const rowChildren = (
@@ -952,6 +961,7 @@ function ProjectHeaderRow({
           statusBucket={statusBucket}
           projectViewKey={project.viewKey}
           backdrop={getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered })}
+          iconSize={projectIconSize}
           chevron={chevron}
           showChevron={isHovered && chevron !== null}
           isArchiving={isArchiving}
@@ -1113,6 +1123,7 @@ function WorkspaceRowInner({
   }, [interaction]);
 
   const accessibilityState = useMemo(() => ({ selected }), [selected]);
+  const { tightRows } = useSidebarDensityLayout();
 
   return (
     <SidebarWorkspaceRowFrame workspace={workspace} isDragging={isDragging}>
@@ -1124,6 +1135,7 @@ function WorkspaceRowInner({
           isPressed,
           selected,
           isHovered,
+          tightRows,
         });
         const backdrop = getSidebarRowBackdrop({ isDragging, isPressed, selected, isHovered });
         return (
@@ -1603,6 +1615,7 @@ function ProjectBlock({
   const activeServerId = activeWorkspaceSelection?.serverId ?? null;
   const activeHostStatus = useHostRuntimeConnectionStatus(activeServerId ?? "");
   const preferredServerId = activeHostStatus === "online" ? activeServerId : null;
+  const { emptyProjectPlaceholder } = useSidebarDensityLayout();
   const rowModel = useMemo(
     () =>
       buildSidebarProjectRowModel({
@@ -1782,7 +1795,8 @@ function ProjectBlock({
           ) : null}
         </>
       );
-    } else if (rowModel.trailingAction.kind === "new_workspace") {
+    } else if (rowModel.trailingAction.kind === "new_workspace" && emptyProjectPlaceholder) {
+      // Compact keeps an empty project to its header row; the header's own "+" still creates one.
       projectChildren = (
         <NewWorkspaceGhostRow
           project={project}
@@ -2593,6 +2607,11 @@ const styles = StyleSheet.create((theme) => ({
   },
   projectRowPressed: {
     backgroundColor: theme.colors.surface2,
+  },
+  projectRowCompact: {
+    minHeight: 28,
+    paddingVertical: theme.spacing[1],
+    marginBottom: 0,
   },
   projectRowDragging: {
     backgroundColor: theme.colors.surface2,

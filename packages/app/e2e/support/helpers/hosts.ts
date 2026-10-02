@@ -219,6 +219,23 @@ export async function expectHostBadgeIconOnly(page: Page, target: HostBadgeTarge
   ).toHaveAccessibleName(new RegExp(target.hostName));
 }
 
+// A bare glyph on the title line sits on the title's centre line, not on its top edge: the
+// glyph is shorter than the line, so top-aligning it would lift it above the text beside it.
+export async function expectHostBadgeCenteredOnTitle(
+  page: Page,
+  target: HostBadgeTarget & { title: string },
+): Promise<void> {
+  const row = page.getByTestId(`sidebar-workspace-row-${target.serverId}:${target.workspaceId}`);
+  const badgeBox = await hostBadge(page, target).boundingBox();
+  const titleBox = await row.getByText(target.title, { exact: true }).boundingBox();
+  if (!badgeBox || !titleBox) {
+    throw new Error("Expected the host badge and the title to be laid out");
+  }
+  const badgeCenter = badgeBox.y + badgeBox.height / 2;
+  const titleCenter = titleBox.y + titleBox.height / 2;
+  expect(Math.abs(badgeCenter - titleCenter)).toBeLessThanOrEqual(1);
+}
+
 export async function expectNoHostBadge(page: Page, target: HostBadgeTarget): Promise<void> {
   await expect(hostBadge(page, target)).toHaveCount(0, { timeout: 15_000 });
 }

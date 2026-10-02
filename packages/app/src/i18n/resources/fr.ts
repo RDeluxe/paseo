@@ -1189,6 +1189,11 @@ export const fr: TranslationResources = {
       showBackground: "Afficher les espaces en arrière-plan",
       trigger: "Préférences d’affichage",
       heading: "Affichage",
+      density: {
+        label: "Densité",
+        comfortable: "Confortable",
+        compact: "Compacte",
+      },
       grouping: {
         label: "Regroupement",
         project: "Projet",

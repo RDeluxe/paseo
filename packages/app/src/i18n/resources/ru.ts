@@ -1178,6 +1178,11 @@ export const ru: TranslationResources = {
       showBackground: "Показать фоновые пространства",
       trigger: "Настройки отображения",
       heading: "Отображение",
+      density: {
+        label: "Плотность",
+        comfortable: "Свободная",
+        compact: "Компактная",
+      },
       grouping: {
         label: "Группировка",
         project: "Проект",

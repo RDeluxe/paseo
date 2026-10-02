@@ -1174,6 +1174,11 @@ export const ja: TranslationResources = {
       showBackground: "バックグラウンドを表示",
       trigger: "表示設定",
       heading: "表示",
+      density: {
+        label: "表示密度",
+        comfortable: "ゆったり",
+        compact: "コンパクト",
+      },
       grouping: {
         label: "グループ化",
         project: "プロジェクト",
