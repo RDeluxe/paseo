@@ -1233,6 +1233,11 @@ export const es: TranslationResources = {
         status: "Estado",
         labels: "Etiquetas",
       },
+      projectIcon: {
+        label: "Icono del proyecto",
+        avatar: "Avatar",
+        folder: "Carpeta",
+      },
       titleSource: {
         label: "Título",
         title: "Título",

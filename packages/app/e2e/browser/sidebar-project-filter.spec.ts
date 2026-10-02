@@ -34,6 +34,7 @@ test.describe("Sidebar project filter", () => {
         /^Grouping/,
         /^Sort/,
         /^Title/,
+        /^Project icon/,
         "Show",
         /^Density/,
         /^Per project/,

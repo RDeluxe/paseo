@@ -1210,6 +1210,11 @@ export const ja: TranslationResources = {
         status: "ステータス",
         labels: "ラベル",
       },
+      projectIcon: {
+        label: "プロジェクトのアイコン",
+        avatar: "アバター",
+        folder: "フォルダ",
+      },
       titleSource: {
         label: "タイトル",
         title: "タイトル",
