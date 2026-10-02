@@ -4,7 +4,7 @@ import type {
   SidebarWorkspaceEntry,
   SidebarWorkspacePlacement,
 } from "@/hooks/use-sidebar-workspaces-list";
-import { buildSidebarProjection } from "./sidebar-projection";
+import { buildSidebarProjection, type SidebarProjectionInput } from "./sidebar-projection";
 
 function makeWorkspace(
   id: string,
@@ -66,7 +66,7 @@ function makeProject(
 function projectionInput(options?: {
   groupMode?: "project" | "status";
   pinnedCollapsed?: boolean;
-}) {
+}): SidebarProjectionInput {
   const pinned = makeWorkspace("pinned", "running");
   const unpinned = makeWorkspace("unpinned", "needs_input");
   return {
@@ -85,6 +85,7 @@ function projectionInput(options?: {
     pinnedCollapsed: options?.pinnedCollapsed ?? false,
     collapsedProjectKeys: new Set<string>(),
     collapsedWorkspaceGroupKeys: new Set<string>(),
+    workspaceLimit: 20,
   };
 }
 
@@ -171,6 +172,31 @@ describe("buildSidebarProjection", () => {
 
     expect(projection.shortcutModel.shortcutTargets).toEqual([
       { serverId: "srv", workspaceId: "unpinned" },
+    ]);
+  });
+
+  it("numbers only the rows each project shows before More", () => {
+    const own = ["a", "b", "c", "d"].map((id) => makeWorkspace(id, "running"));
+    const other = makeWorkspace("other", "running", [], "other-project");
+    const all = [...own, other];
+    const projection = buildSidebarProjection({
+      ...projectionInput(),
+      projects: [
+        makeProject(own.map((workspace) => workspace.placement)),
+        makeProject([other.placement], "other-project"),
+      ],
+      pinnedKeys: { pinnedWorkspaceKeys: [], pinnedAtByKey: {} },
+      workspaceEntriesByKey: new Map(
+        all.map((workspace) => [workspace.entry.workspaceKey, workspace.entry]),
+      ),
+      workspaceLimit: 3,
+    });
+
+    expect(projection.shortcutModel.shortcutTargets.map((target) => target.workspaceId)).toEqual([
+      "a",
+      "b",
+      "c",
+      "other",
     ]);
   });
 });

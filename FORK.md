@@ -62,6 +62,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/compact-density`.
 - **Règle d'abandon :** si upstream ajoute une densité compacte, prendre la leur.
 
+### Limite par projet et « More » à la Cursor
+
+- **Objectif :** qu'un projet avec un long historique (jusqu'à 200 conversations importées de Cursor) n'écrase pas ceux du dessous. On ne voit que ses derniers workspaces, et on en dévoile plus à la demande, par pages, comme dans Cursor. Deux écarts voulus. `docs/product.md` veut une expérience par défaut légère et celle d'upstream ; ici la limite est active d'emblée (5, là où upstream montre 20 lignes avant « Show more »), parce que c'est pour elle que le fork existe. `docs/design.md` §1 : « When two surfaces do the same semantic thing in two different ways, one of them is wrong » ; les projets ont « More », les épinglés et les groupes de statut gardent le « Show more / Show less » d'upstream, parce qu'un projet porte des centaines de workspaces et qu'une section de statut en porte peu.
+- **Comportement :** 3, 5, 10 ou 20 workspaces par projet, 5 par défaut. Sous la limite, une ligne « More » discrète, sans flèche. Chaque clic affiche 10 workspaces de plus, et la ligne disparaît quand tout est visible (pas de « Show less »). Le workspace affiché à l'écran reste toujours visible. Les raccourcis Cmd+1…9 ne numérotent que les lignes affichées avant « More » (le workspace sélectionné, montré au-delà de la limite, garde sa place mais pas de numéro), et le glisser-déposer des lignes visibles laisse les workspaces cachés à leur place. Le réglage n'apparaît qu'en regroupement par projet ; ses options sont des nombres, sans icône (la coche prend la colonne de tête, comme le prévoit `showSelectedCheck` dans `docs/menus.md`).
+- **Où :** `display-preferences/project-limit.ts` ; le réglage `sidebarWorkspaceLimit` ; `sidebar/limited-sidebar-group.ts` (logique pure) ; le hook `sidebar/use-paged-sidebar-group.ts` (le `useLimitedSidebarGroup` d'upstream reste intact pour les épinglés et les groupes de statut) ; `ProjectBlock` dans `sidebar-workspace-list.tsx` ; l'action `"more"` de `SidebarGroupToggleRow` ; la numérotation dans `buildSidebarProjection` (`sidebar/sidebar-projection.ts`, via `projectWorkspaceGroupOptions`, que `ProjectBlock` utilise aussi) ; `mergeIntoVisibleSlots` dans `utils/sidebar-reorder.ts`, appelé par `handleWorkspaceReorder`.
+- **Preuve :** `e2e/browser/sidebar-project-limit.spec.ts`, `sidebar/limited-sidebar-group.test.ts`, `sidebar/sidebar-projection.test.ts`, `utils/sidebar-reorder.test.ts`, `hooks/use-settings/storage.test.ts` ; `workspace-shortcut-targets-subscriber.test.tsx` monte un `QueryClientProvider`, puisque le modèle lit les réglages. Le test de défilement d'upstream (`sidebar-workspace.spec.ts`) clique deux fois sur « More » pour afficher ses 25 workspaces.
+- **Commit d'origine :** `feature/project-workspace-limit`. Les raccourcis et le glisser-déposer étaient d'abord deux commits de correction, `feature/shortcuts-follow-limit` et `feature/reorder-keeps-hidden` ; ils sont fondus ici depuis le 2026-10-05, et leurs tags restent comme trace.
+- **Règle d'abandon :** si upstream rend la limite réglable avec un « More » paginé, prendre le leur. Si la limite devient réglable mais avec un simple déplier/replier, garder notre « More » et me prévenir.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -97,7 +106,7 @@ On garde volontairement `appId: sh.paseo.desktop` et `productName: Paseo` : l'ap
    npm ci && npm run build:app-deps && npm run build:server-deps
    (cd packages/app && npm run typecheck)
    (cd packages/desktop && npm run typecheck)
-   (cd packages/app && npx vitest run src/components/sidebar src/hooks/use-settings src/utils src/stores src/i18n)
+   (cd packages/app && npx vitest run src/components/sidebar src/components/workspace-shortcut-targets-subscriber.test.tsx src/hooks/use-settings src/utils src/stores src/i18n)
    (cd packages/app && npx playwright test e2e/browser/sidebar-*.spec.ts e2e/browser/host-appearance.spec.ts)
    git diff --name-only --diff-filter=d <nouveau-tag>..main | grep -E '\.(ts|tsx)$' | xargs npm run lint --
    git diff --name-only --diff-filter=d <nouveau-tag>..main | grep -E '\.(ts|tsx|json|md|yml)$' | xargs npm run format:check:files --
