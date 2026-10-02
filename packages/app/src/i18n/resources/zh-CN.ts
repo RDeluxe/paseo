@@ -1165,6 +1165,11 @@ export const zhCN: TranslationResources = {
         status: "状态",
         labels: "标签",
       },
+      projectIcon: {
+        label: "项目图标",
+        avatar: "头像",
+        folder: "文件夹",
+      },
       titleSource: {
         label: "标题",
         title: "标题",

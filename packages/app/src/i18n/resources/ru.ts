@@ -1190,6 +1190,11 @@ export const ru: TranslationResources = {
         status: "Статус",
         labels: "Метки",
       },
+      projectIcon: {
+        label: "Значок проекта",
+        avatar: "Аватар",
+        folder: "Папка",
+      },
       titleSource: {
         label: "Заголовок",
         title: "Заголовок",
