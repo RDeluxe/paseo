@@ -1183,6 +1183,11 @@ export const ko: TranslationResources = {
         lastPrompt: "마지막 프롬프트",
         updateHost: "작업 공간을 정렬하려면 호스트를 업데이트하세요",
       },
+      density: {
+        label: "밀도",
+        comfortable: "여유 있게",
+        compact: "촘촘하게",
+      },
       grouping: {
         label: "그룹화",
         project: "프로젝트",

@@ -1212,6 +1212,11 @@ export const es: TranslationResources = {
         lastPrompt: "Último prompt",
         updateHost: "Actualiza los hosts para ordenar los espacios de trabajo",
       },
+      density: {
+        label: "Densidad",
+        comfortable: "Cómoda",
+        compact: "Compacta",
+      },
       grouping: {
         label: "Agrupación",
         project: "Proyecto",

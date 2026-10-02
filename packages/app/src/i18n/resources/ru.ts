@@ -1193,6 +1193,11 @@ export const ru: TranslationResources = {
         lastPrompt: "Последний запрос",
         updateHost: "Обновите хосты для сортировки рабочих пространств",
       },
+      density: {
+        label: "Плотность",
+        comfortable: "Свободная",
+        compact: "Компактная",
+      },
       grouping: {
         label: "Группировка",
         project: "Проект",

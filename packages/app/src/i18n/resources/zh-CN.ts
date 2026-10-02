@@ -1168,6 +1168,11 @@ export const zhCN: TranslationResources = {
         lastPrompt: "最近提示词",
         updateHost: "请更新主机以排序工作区",
       },
+      density: {
+        label: "密度",
+        comfortable: "宽松",
+        compact: "紧凑",
+      },
       grouping: {
         label: "分组",
         project: "项目",

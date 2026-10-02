@@ -1202,6 +1202,11 @@ export const ptBR: TranslationResources = {
         lastPrompt: "Último prompt",
         updateHost: "Atualize os hosts para ordenar os espaços de trabalho",
       },
+      density: {
+        label: "Densidade",
+        comfortable: "Confortável",
+        compact: "Compacta",
+      },
       grouping: {
         label: "Agrupamento",
         project: "Projeto",
