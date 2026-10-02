@@ -10,7 +10,7 @@ import {
   type SidebarLabelFilter,
 } from "@/stores/sidebar-view-store";
 import { DEFAULT_SIDEBAR_CHECKS_DISPLAY, type SidebarChecksDisplay } from "./checks-display";
-import type { SidebarDensity } from "./density";
+import { hasCompactRows, type SidebarDensity } from "./density";
 import type { SidebarHideInactiveDays, SidebarWorkspaceLimit } from "./project-limit";
 import { DEFAULT_SIDEBAR_ROW_ITEMS, type SidebarRowItem, type SidebarRowItems } from "./row-items";
 
@@ -211,25 +211,33 @@ export function useSidebarRowItems(): SidebarRowItems {
 export function useSidebarMetaPreferences(): {
   rowItems: SidebarRowItems;
   checksDisplay: SidebarChecksDisplay;
+  /** Semi-compact's terser line: no separators, and states said by their glyph alone. */
+  condensed: boolean;
 } {
   const {
-    settings: { sidebarRowItems, sidebarChecksDisplay },
+    settings: { sidebarRowItems, sidebarChecksDisplay, sidebarDensity },
   } = useAppSettings();
   return useMemo(
     () => ({
       rowItems: sidebarRowItems ?? DEFAULT_SIDEBAR_ROW_ITEMS,
       checksDisplay: sidebarChecksDisplay ?? DEFAULT_SIDEBAR_CHECKS_DISPLAY,
+      condensed: sidebarDensity === "semiCompact",
     }),
-    [sidebarRowItems, sidebarChecksDisplay],
+    [sidebarRowItems, sidebarChecksDisplay, sidebarDensity],
   );
 }
 
 /** Just the density, for the row renderers — one field per row, like `useSidebarRowItems`. */
-export function useIsCompactSidebar(): boolean {
+export function useSidebarDensity(): SidebarDensity {
   const {
     settings: { sidebarDensity },
   } = useAppSettings();
-  return sidebarDensity === "compact";
+  return sidebarDensity;
+}
+
+/** Whether rows take the tight geometry, which semi-compact and compact share. */
+export function useIsCompactSidebar(): boolean {
+  return hasCompactRows(useSidebarDensity());
 }
 
 export type SidebarProjectLimit = Pick<

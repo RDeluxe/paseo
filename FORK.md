@@ -86,6 +86,15 @@ Chaque fonction a ci-dessous son **objectif** (le besoin, à préserver quelle q
 - **Commit d'origine :** `feature/collapse-all`.
 - **Règle d'abandon :** si upstream ajoute un « collapse all », prendre le leur.
 
+### Densité semi-compacte
+
+- **Objectif :** garder tout ce que dit une ligne confortable (branche, PR, checks, labels), mais dans beaucoup moins de place, pour qui veut la densité sans perdre l'information.
+- **Comportement :** troisième choix de « Density », entre confortable et compact. Les lignes prennent la géométrie serrée du compact et gardent la ligne d'infos, en plus courte : l'hôte devient une icône seule au bout du titre, la PR n'affiche que son numéro (l'icône et sa couleur disent ouverte, fusionnée ou fermée), les checks se réduisent à leur icône, et les séparateurs `·` disparaissent. L'avatar du projet garde sa taille.
+- **Où :** `semiCompact` et `hasCompactRows` dans `display-preferences/density.ts` ; `condensed` dans `useSidebarMetaPreferences` (`display-preferences/model.ts`), lu par `WorkspaceMetaRow` (`sidebar/workspace-meta-row/index.tsx`) ; `SidebarWorkspaceRowContent` pour l'hôte.
+- **Preuve :** `e2e/browser/sidebar-density.spec.ts`, `e2e/browser/host-appearance.spec.ts`, `hooks/use-settings/storage.test.ts`.
+- **Commit d'origine :** `feature/semi-compact-density`.
+- **Règle d'abandon :** si upstream ajoute une densité intermédiaire, prendre la leur.
+
 ## Modifications propres au fork (hors fonctions)
 
 | Modification                                                                              | Fichier                                         | Raison                                                                                                                                                                                                                                                                                                                                                                                                             |
