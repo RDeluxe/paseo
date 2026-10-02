@@ -19,6 +19,11 @@ import {
   type SidebarDensity,
 } from "@/components/sidebar/display-preferences/density";
 import {
+  DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
+  SIDEBAR_WORKSPACE_LIMITS,
+  type SidebarWorkspaceLimit,
+} from "@/components/sidebar/display-preferences/project-limit";
+import {
   DEFAULT_SIDEBAR_ROW_ITEMS,
   isChecksHiddenByLegacyRowItem,
   type SidebarRowItems,
@@ -100,6 +105,8 @@ export interface AppSettings {
   sidebarRowItems: SidebarRowItems;
   sidebarChecksDisplay: SidebarChecksDisplay;
   sidebarDensity: SidebarDensity;
+  /** Workspaces a project shows before "More". */
+  sidebarWorkspaceLimit: SidebarWorkspaceLimit;
   /** Top-level sidebar rows in display order; empty means the default order, all visible. */
   sidebarNavItems: SidebarNavPreference[];
   /** Sidebar footer items in display order; empty means the default order, all visible. */
@@ -160,6 +167,7 @@ export const DEFAULT_CLIENT_SETTINGS: AppSettings = {
   sidebarRowItems: DEFAULT_SIDEBAR_ROW_ITEMS,
   sidebarChecksDisplay: DEFAULT_SIDEBAR_CHECKS_DISPLAY,
   sidebarDensity: DEFAULT_SIDEBAR_DENSITY,
+  sidebarWorkspaceLimit: DEFAULT_SIDEBAR_WORKSPACE_LIMIT,
   sidebarNavItems: [],
   sidebarFooterItems: [],
   usage: DEFAULT_USAGE_PREFERENCES,
@@ -256,6 +264,9 @@ const StoredAppSettingsSchema = z
       .optional()
       .catch(DEFAULT_SIDEBAR_CHECKS_DISPLAY),
     sidebarDensity: z.enum(SIDEBAR_DENSITIES).catch(DEFAULT_SIDEBAR_DENSITY),
+    sidebarWorkspaceLimit: z
+      .literal(SIDEBAR_WORKSPACE_LIMITS)
+      .catch(DEFAULT_SIDEBAR_WORKSPACE_LIMIT),
     sidebarNavItems: z.array(z.object({ key: z.string(), visible: z.boolean() })).catch([]),
     sidebarFooterItems: z.array(z.object({ key: z.string(), visible: z.boolean() })).catch([]),
     usage: UsagePreferencesSchema,

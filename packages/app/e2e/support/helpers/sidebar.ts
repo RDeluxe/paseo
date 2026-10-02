@@ -1,6 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 import { getServerId } from "./server-id";
 import type { SidebarDensity } from "@/components/sidebar/display-preferences/density";
+import type { SidebarWorkspaceLimit } from "@/components/sidebar/display-preferences/project-limit";
 
 interface ContextMenuAnchor {
   x: number;
@@ -235,6 +236,14 @@ export async function selectSidebarStatusGrouping(page: Page): Promise<void> {
 export async function selectSidebarDensity(page: Page, density: SidebarDensity): Promise<void> {
   await openSidebarDisplayPage(page, "sidebar-display-density");
   await page.getByTestId(`sidebar-density-${density}`).click();
+}
+
+export async function selectSidebarWorkspaceLimit(
+  page: Page,
+  limit: SidebarWorkspaceLimit,
+): Promise<void> {
+  await openSidebarDisplayPage(page, "sidebar-display-workspace-limit");
+  await page.getByTestId(`sidebar-workspace-limit-${limit}`).click();
 }
 
 export async function openMobileAgentSidebar(page: Page): Promise<void> {
