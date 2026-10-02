@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  collapseAllSections,
   type CollapsedProjectsState,
+  expandAllSections,
   mergePersistedCollapsedProjects,
   serializeCollapsedProjects,
   setProjectCollapsed,
@@ -28,6 +30,24 @@ describe("sidebar collapsed projects transitions", () => {
 
     expect(Array.from(state.collapsedProjectKeys)).toEqual(["project-b"]);
     expect(Array.from(state.collapsedWorkspaceGroupKeys)).toEqual(["running"]);
+  });
+
+  it("collapses every project, status group and the pinned section, then expands them all", () => {
+    const collapsed = collapseAllSections(setProjectCollapsed(emptyState(), "project-a", true), {
+      projectKeys: ["project-a", "project-b"],
+      workspaceGroupKeys: ["running", "done"],
+    });
+
+    expect(serializeCollapsedProjects(collapsed)).toEqual({
+      collapsedProjectKeys: ["project-a", "project-b"],
+      collapsedWorkspaceGroupKeys: ["running", "done"],
+      collapsedPinned: true,
+    });
+    expect(serializeCollapsedProjects(expandAllSections(collapsed))).toEqual({
+      collapsedProjectKeys: [],
+      collapsedWorkspaceGroupKeys: [],
+      collapsedPinned: false,
+    });
   });
 
   it("serializes collapsed project keys for preference storage", () => {
